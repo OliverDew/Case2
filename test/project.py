@@ -9,3 +9,8 @@ df = df[~df["country_or_area"].isin([
     "So. African Customs Union"])]
 df["country_or_area"] = df["country_or_area"].replace(
     "Fmr Fed. Rep. of Germany", "Germany")
+
+df = df.groupby('country_or_area', group_keys=False).apply(
+    lambda x: x.sample(frac=0.1))
+df = df.reset_index(drop=True)
+df.to_csv("case2_sampled.csv", index=False)
