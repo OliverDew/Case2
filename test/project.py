@@ -1,5 +1,8 @@
 from pandas import read_csv
 import pandas as pd
+import matplotlib.pyplot as plt
+import matplotlib.ticker as ticker
+import seaborn as sns
 
 ##### Oliver - Read CSV
 df = read_csv("case2.csv", sep=";")
@@ -69,13 +72,9 @@ df_net.to_csv("case2_net_trade_by_flow.csv", index=False)
 
 print("\nNet trade dataset created:")
 print(df_net.info())
-
+print(df_net.describe())
 
 # Oliver - Plot Albanian cereal production over the years
-import matplotlib.pyplot as plt
-import matplotlib.ticker as ticker
-
-
 alb_cereal = df_net[
     (df_net["country_or_area"] == "Albania") &
     (df_net["category"] == "10_cereals")
@@ -91,4 +90,60 @@ plt.title("Albania – Net Trade in Cereals Over Time")
 plt.xlabel("Year")
 plt.ylabel("Net Trade (USD)")
 plt.grid(True)
+plt.show()
+
+# Vera: filter df_net for categories cereals and iron&steel:
+df_net_cereals = df_net.loc[df_net['category'] == '10_cereals', :]
+print(df_net_cereals.head())
+
+df_net_IronAndSteel = df_net.loc[df_net['category'] == '72_iron_and_steel', :]
+print(df_net_IronAndSteel.head())
+
+# Vera: scatter plot net_usd per year:
+fig, ax = plt.subplots(figsize=(12, 8))
+df_net.plot.scatter(x="year", y="net_usd", ax=ax)
+plt.title("Net_USD per Year")
+# plt.show()
+
+# Vera: Bar Chart Top Players in Cereals
+fig, ax = plt.subplots(figsize=(10, 6))
+df_net_cereals['country_or_area'].value_counts().plot.bar(color='skyblue', edgecolor='black', ax=ax)
+plt.title('Trade in Cereals')
+plt.xlabel('country_or_area')
+plt.ylabel('net_usd')
+
+# Vera: Bar Chart Top Players in Iron&Steel
+fig, ax = plt.subplots(figsize=(10, 6))
+df_net_IronAndSteel['country_or_area'].value_counts().plot.bar(color='skyblue', edgecolor='black', ax=ax)
+plt.title('Trade in Iron and Steel')
+plt.xlabel('country_or_area')
+plt.ylabel('net_usd')
+plt.xlabel('country_or_area')
+plt.ylabel('net_usd')
+
+# Vera: Pie Chart for Category
+fig, ax = plt.subplots(figsize=(8, 8))
+df_net['category'].value_counts().plot.pie(autopct='%1.0f%%')
+plt.title('Proportion of Cereals and Iron and Steel')
+plt.ylabel('')
+
+# Vera: Boxplot
+fig, ax = plt.subplots(figsize=(12, 8))
+df_net.boxplot(column='net_usd', by='category', ax=ax)
+plt.xlabel('category')
+plt.ylabel('net_usd')
+
+# Vera: Heatmap
+corr=df_net.corr(numeric_only=True)
+sns.heatmap(corr, cmap='coolwarm', center=0, annot=True)
+plt.title('Correlation Heatmap')
+
+# Vera: Scatter Plot by Category
+fig, ax = plt.subplots(figsize=(10, 6))
+sns.scatterplot(x='net_imports', y='net_export', hue='country_or_area', data=df_net)
+plt.title('Imports vs. Exports Colored by Country')
+plt.xlabel('net_imports')
+plt.ylabel('net_export')
+plt.legend(title='Country')
+
 plt.show()
