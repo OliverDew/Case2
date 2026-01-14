@@ -147,3 +147,193 @@ plt.ylabel('net_export')
 plt.legend(title='Country')
 
 plt.show()
+
+#K-Means
+from sklearn.cluster import KMeans
+from sklearn.preprocessing import StandardScaler
+from sklearn.metrics import pairwise_distances
+
+# 1. Aggregate per country
+df_cluster = (
+    df_net
+    .groupby('country_or_area')[['net_imports', 'net_export', 'net_usd']]
+    .mean()
+    .reset_index()
+)
+
+# 2. Scale
+scaler = StandardScaler()
+X_scaled = scaler.fit_transform(
+    df_cluster[['net_imports', 'net_export', 'net_usd']]
+)
+
+# 3. Elbow method
+inertia = []
+for k in range(1, 11):
+    kmeans = KMeans(n_clusters=k, random_state=42, n_init=10)
+    kmeans.fit(X_scaled)
+    inertia.append(kmeans.inertia_)
+
+plt.figure(figsize=(8, 5))
+plt.plot(range(1, 11), inertia, marker='o')
+plt.xlabel('Number of clusters (k)')
+plt.ylabel('Inertia')
+plt.title('Elbow Method for Optimal k')
+plt.grid(True)
+plt.show()
+
+# 4. Final K-Means (k = 3)
+kmeans = KMeans(n_clusters=3, random_state=42, n_init=10)
+df_cluster['cluster'] = kmeans.fit_predict(X_scaled)
+
+# 5. Cluster centroids in ORIGINAL units
+centroids = pd.DataFrame(
+    scaler.inverse_transform(kmeans.cluster_centers_),
+    columns=['net_imports', 'net_export', 'net_usd']
+)
+
+print("Cluster centroids (original scale):")
+print(centroids)
+
+# 6. Euclidean distances between cluster centers (scaled space)
+Euclidean = pd.DataFrame(
+    pairwise_distances(kmeans.cluster_centers_, metric='euclidean')
+)
+
+print("Euclidean distances between clusters:")
+print(Euclidean)
+
+# 7. Cluster summary (same as centroids but easier to explain)
+cluster_summary = (
+    df_cluster
+    .groupby('cluster')[['net_imports', 'net_export', 'net_usd']]
+    .mean()
+)
+
+print(cluster_summary)
+
+# 8. 2D Visualization
+plt.figure(figsize=(10, 6))
+sns.scatterplot(
+    data=df_cluster,
+    x='net_imports',
+    y='net_export',
+    hue='cluster',
+    palette='Set2'
+)
+plt.title('K-Means Clustering of Countries by Trade')
+plt.xlabel('Average Net Imports')
+plt.ylabel('Average Net Exports')
+plt.grid(True)
+plt.show()
+
+# 9. Merge clusters back to df_net
+df_net = df_net.merge(
+    df_cluster[['country_or_area', 'cluster']],
+    on='country_or_area',
+    how='left'
+)
+#K-Means HeatMap
+# Cluster-level averages
+heatmap_data = (
+    df_cluster
+    .groupby('cluster')[['net_imports', 'net_export', 'net_usd']]
+    .mean()
+)
+
+print(heatmap_data)
+
+from sklearn.preprocessing import StandardScaler
+
+scaler_hm = StandardScaler()
+heatmap_scaled = pd.DataFrame(
+    scaler_hm.fit_transform(heatmap_data),
+    index=heatmap_data.index,
+    columns=heatmap_data.columns
+)
+
+print(heatmap_scaled)
+
+plt.figure(figsize=(8, 5))
+sns.heatmap(
+    heatmap_scaled,
+    annot=True,
+    cmap='coolwarm',
+    center=0,
+    linewidths=0.5
+)
+
+plt.title('Cluster Heatmap: Trade Indicators (K-Means)')
+plt.xlabel('Trade Indicators')
+plt.ylabel('Cluster')
+plt.tight_layout()
+plt.show()
+
+sns.clustermap(
+    heatmap_scaled,
+    cmap='coolwarm',
+    center=0,
+    annot=True,
+    figsize=(8, 6)
+)
+
+#Hierarchical Clustering: Agglomerative
+from scipy.cluster.hierarchy import dendrogram, linkage
+
+# Linkage matrix
+Z = linkage(X_scaled, method='ward')
+
+plt.figure(figsize=(12, 6))
+dendrogram(
+    Z,
+    labels=df_cluster['country_or_area'].values,
+    leaf_rotation=90,
+    leaf_font_size=8
+)
+
+plt.title('Hierarchical Clustering Dendrogram (Ward)')
+plt.xlabel('Country')
+plt.ylabel('Distance')
+plt.tight_layout()
+plt.show()
+
+from sklearn.cluster import AgglomerativeClustering
+
+agg = AgglomerativeClustering(
+    n_clusters=3,
+    linkage='ward'
+)
+
+df_cluster['cluster_hier'] = agg.fit_predict(X_scaled)
+
+print(df_cluster.head())
+
+hier_summary = (
+    df_cluster
+    .groupby('cluster_hier')[['net_imports', 'net_export', 'net_usd']]
+    .mean()
+)
+
+print(hier_summary)
+
+plt.figure(figsize=(10, 6))
+sns.scatterplot(
+    data=df_cluster,
+    x='net_imports',
+    y='net_export',
+    hue='cluster_hier',
+    palette='Set1'
+)
+
+plt.title('Hierarchical Clustering of Countries by Trade')
+plt.xlabel('Average Net Imports')
+plt.ylabel('Average Net Exports')
+plt.grid(True)
+plt.show()
+
+df_net = df_net.merge(
+    df_cluster[['country_or_area', 'cluster_hier']],
+    on='country_or_area',
+    how='left'
+)
+
