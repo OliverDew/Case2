@@ -25,7 +25,7 @@ print(df.info())
 
 ##### Vera - Stratified Sampling of Countries as Classes
 df = df.groupby('country_or_area', group_keys=False).apply(
-    lambda x: x.sample(frac=0.1))
+    lambda x: x.sample(frac=0.6))
 df = df.reset_index(drop=True)
 df.to_csv("case2_sampled.csv", index=False)
 
@@ -144,9 +144,9 @@ plt.legend(title='Country')
 plt.show()
 
 #Thao: K-Means
-=======
+# =======
 #K-Means
->>>>>>> origin/master
+# >>>>>>> origin/master
 from sklearn.cluster import KMeans
 from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import pairwise_distances
@@ -334,7 +334,7 @@ df_net = df_net.merge(
     on='country_or_area',
     how='left'
 )
-<<<<<<< HEAD
+# <<<<<<< HEAD
 #Time-Series K-Means for cereals
 import pandas as pd
 import numpy as np
