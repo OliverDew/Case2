@@ -1,0 +1,656 @@
+country_or_area,year,flow,trade_usd,weight_kg,category
+Albania,1997,Import,16396,14046.0,72_iron_and_steel
+Albania,2007,Import,62606,44175.0,72_iron_and_steel
+Albania,2016,Import,621578,1040623.0,72_iron_and_steel
+Albania,2010,Export,1954132,827210.0,72_iron_and_steel
+Albania,2003,Export,551789,4526500.0,72_iron_and_steel
+Albania,1998,Import,6896,12585.0,72_iron_and_steel
+Albania,2006,Import,825790,1780980.0,72_iron_and_steel
+Albania,2005,Import,2810,1000.0,72_iron_and_steel
+Albania,1996,Import,13551,30714.0,72_iron_and_steel
+Albania,2011,Import,34962,29034.0,72_iron_and_steel
+Algeria,2015,Import,1079517,586968.0,72_iron_and_steel
+Algeria,2007,Import,589476,447905.0,72_iron_and_steel
+Algeria,2001,Import,1764259,1851003.0,72_iron_and_steel
+Algeria,2011,Import,209793,95062.0,72_iron_and_steel
+Algeria,1995,Import,2391526,7326213.0,72_iron_and_steel
+Algeria,1996,Import,29304,238.0,72_iron_and_steel
+Algeria,2013,Import,152538,208954.0,72_iron_and_steel
+Algeria,2000,Import,17699,12096.0,72_iron_and_steel
+Algeria,2000,Import,135193974,665769073.0,72_iron_and_steel
+Algeria,2006,Import,161909,443052.0,10_cereals
+Algeria,2012,Import,6458969,9332725.0,72_iron_and_steel
+Algeria,1996,Export,518639,6500000.0,72_iron_and_steel
+Andorra,2012,Import,40796,17777.0,72_iron_and_steel
+Andorra,2000,Import,55,150.0,10_cereals
+Andorra,1995,Import,809,1125.0,10_cereals
+Andorra,2014,Export,16973,47748.0,72_iron_and_steel
+Andorra,2000,Import,11649,7293.0,72_iron_and_steel
+Andorra,1999,Import,421,66.0,72_iron_and_steel
+Angola,2007,Import,202066,113149.0,72_iron_and_steel
+Angola,2015,Import,2150,18.0,72_iron_and_steel
+Angola,2009,Import,3791,217.0,72_iron_and_steel
+Angola,2010,Import,357464,31390.0,72_iron_and_steel
+Angola,2014,Import,16728,13359.0,72_iron_and_steel
+Angola,2011,Import,112797,37736.0,72_iron_and_steel
+Angola,2013,Import,27758,1558.0,72_iron_and_steel
+Anguilla,2004,Import,55,313.0,10_cereals
+Anguilla,2007,Export,19,12.0,10_cereals
+Anguilla,2001,Import,129,37.0,72_iron_and_steel
+Anguilla,2006,Import,7026,1763.0,72_iron_and_steel
+Antigua and Barbuda,1999,Import,7998,2625.0,72_iron_and_steel
+Antigua and Barbuda,2006,Import,9517,1644.0,72_iron_and_steel
+Antigua and Barbuda,2013,Export,791,25.0,72_iron_and_steel
+Argentina,1994,Import,1481789,1475692.0,72_iron_and_steel
+Argentina,2016,Import,3753244,8067606.0,72_iron_and_steel
+Argentina,2013,Export,14348344,8361785.0,72_iron_and_steel
+Argentina,1997,Import,5443298,5685524.0,72_iron_and_steel
+Argentina,2013,Import,873609,597225.0,72_iron_and_steel
+Argentina,2009,Import,1547363,610678.0,72_iron_and_steel
+Argentina,1994,Export,68558,66884.0,72_iron_and_steel
+Argentina,2011,Import,30612748,45234000.0,72_iron_and_steel
+Argentina,2006,Import,46638853,17150149.0,72_iron_and_steel
+Argentina,1998,Export,1462947,2134374.0,72_iron_and_steel
+Argentina,2007,Export,36942531,58040228.0,72_iron_and_steel
+Argentina,2010,Import,2159071,538887.0,72_iron_and_steel
+Argentina,1999,Import,16664,19216.0,10_cereals
+Armenia,2014,Export,544,337.0,72_iron_and_steel
+Armenia,2012,Import,422,40.0,72_iron_and_steel
+Armenia,2004,Export,149225,2034900.0,72_iron_and_steel
+Armenia,2006,Import,3600,3000.0,72_iron_and_steel
+Armenia,2008,Export,177239,113901.0,72_iron_and_steel
+Armenia,2003,Import,282570,689335.0,72_iron_and_steel
+Armenia,2004,Export,1099433,2198865.0,72_iron_and_steel
+Armenia,2008,Import,328600,312997.0,72_iron_and_steel
+Armenia,2009,Export,86517512,5273500.0,72_iron_and_steel
+Aruba,2009,Export,47,12.0,10_cereals
+Aruba,2011,Import,686132,521846.0,10_cereals
+Aruba,2011,Import,3589,544.0,72_iron_and_steel
+Aruba,2016,Import,28817,6037.0,72_iron_and_steel
+Australia,1996,Import,966156,998494.0,72_iron_and_steel
+Australia,1988,Export,9414,32054.0,72_iron_and_steel
+Australia,1992,Export,48610,127000.0,72_iron_and_steel
+Australia,2001,Import,1206994,5761737.0,72_iron_and_steel
+Australia,2015,Import,4182386,4901017.0,72_iron_and_steel
+Australia,1994,Export,463391,248615.0,72_iron_and_steel
+Australia,1998,Re-Export,41646,40500.0,72_iron_and_steel
+Australia,2012,Import,1992094,591246.0,72_iron_and_steel
+Australia,2007,Import,14476,21340.0,72_iron_and_steel
+Australia,2015,Import,6337,4222.0,10_cereals
+Australia,1998,Export,77279,50397.0,72_iron_and_steel
+Australia,2006,Re-Import,51977,23490.0,72_iron_and_steel
+Australia,1999,Re-Export,167755,0.0,10_cereals
+Australia,1990,Import,841845,2449000.0,72_iron_and_steel
+Austria,2003,Export,1133546,1111806.0,72_iron_and_steel
+Austria,2013,Export,216820482,136742752.0,72_iron_and_steel
+Austria,1999,Import,2039007,1394182.0,72_iron_and_steel
+Austria,2010,Import,1295975,861402.0,72_iron_and_steel
+Austria,2011,Import,101492888,75736431.0,72_iron_and_steel
+Austria,2010,Export,161926171,210253961.0,72_iron_and_steel
+Austria,1997,Export,101978,134398.0,72_iron_and_steel
+Austria,2014,Import,41481478,38655668.0,72_iron_and_steel
+Austria,2011,Export,3748936,852700.0,72_iron_and_steel
+Austria,2011,Import,15670200,2453709.0,72_iron_and_steel
+Austria,2012,Import,9497709,19830390.0,10_cereals
+Austria,2000,Import,9425964,37507300.0,72_iron_and_steel
+Azerbaijan,2015,Import,926955,536230.0,72_iron_and_steel
+Azerbaijan,1996,Import,59130,2000.0,72_iron_and_steel
+Azerbaijan,2007,Import,41972,2584.0,72_iron_and_steel
+Azerbaijan,2001,Import,588261,3482385.0,72_iron_and_steel
+Azerbaijan,2006,Import,744900,1238260.0,72_iron_and_steel
+Azerbaijan,2015,Import,114013,245998.0,72_iron_and_steel
+Azerbaijan,2005,Import,69697,374825.0,72_iron_and_steel
+Bahamas,2004,Import,2439,226.0,72_iron_and_steel
+Bahamas,2001,Import,123651,209472.0,10_cereals
+Bahamas,1998,Import,76,4.0,72_iron_and_steel
+Bahamas,2007,Import,399,174.0,10_cereals
+Bahamas,2011,Import,2814,130.0,72_iron_and_steel
+Bahamas,2011,Import,149128,8326.0,72_iron_and_steel
+Bahamas,1997,Import,24,8.0,72_iron_and_steel
+Bahamas,2010,Re-Export,104550,49666.0,72_iron_and_steel
+Bahamas,2012,Import,8794,1355.0,10_cereals
+Bahrain,2016,Re-Export,7958,3238.0,10_cereals
+Bahrain,2009,Import,159050,127439.0,72_iron_and_steel
+Bahrain,2013,Re-Export,6596,6000.0,72_iron_and_steel
+Bahrain,2001,Re-Export,117,22.0,72_iron_and_steel
+Bahrain,2001,Import,8816,3320.0,72_iron_and_steel
+Bahrain,2014,Re-Export,12596,7600.0,10_cereals
+Bahrain,2016,Re-Export,68,1.0,72_iron_and_steel
+Bahrain,2014,Import,1204381,86045.0,72_iron_and_steel
+Bahrain,2007,Re-Export,372,1000.0,72_iron_and_steel
+Bahrain,2015,Import,25907,15794.0,72_iron_and_steel
+Bangladesh,2000,Import,12553,12000.0,72_iron_and_steel
+Bangladesh,2005,Import,692,1999.0,10_cereals
+Bangladesh,2007,Import,3068130,1649376.0,72_iron_and_steel
+Bangladesh,2010,Import,689621,833693.0,72_iron_and_steel
+Bangladesh,2003,Import,775991,3935025.0,72_iron_and_steel
+Bangladesh,2012,Import,7753,12010.0,72_iron_and_steel
+Bangladesh,1997,Import,62385,107000.0,72_iron_and_steel
+Bangladesh,2015,Import,2004125,1726496.0,72_iron_and_steel
+Bangladesh,1992,Import,47271,102000.0,72_iron_and_steel
+Bangladesh,2005,Export,18205,7827.0,72_iron_and_steel
+Bangladesh,2004,Import,1879222,3594559.0,72_iron_and_steel
+Bangladesh,2001,Import,297312,321000.0,72_iron_and_steel
+Bangladesh,2008,Import,252591,402408.0,72_iron_and_steel
+Barbados,2015,Export,500,200.0,72_iron_and_steel
+Barbados,2000,Export,135,136.0,10_cereals
+Barbados,2005,Re-Export,59611,44938.0,72_iron_and_steel
+Barbados,2003,Import,5820,897.0,72_iron_and_steel
+Barbados,2001,Import,1668445,2658930.0,72_iron_and_steel
+Barbados,2008,Import,1765,394.0,72_iron_and_steel
+Barbados,2010,Export,124600,491102.0,72_iron_and_steel
+Belarus,2007,Import,2897200,1987573.0,72_iron_and_steel
+Belarus,2013,Import,11300,4784.0,10_cereals
+Belarus,2010,Import,2007200,3968408.0,72_iron_and_steel
+Belarus,2005,Export,3100,468.0,72_iron_and_steel
+Belarus,2005,Import,7970300,1404710.0,72_iron_and_steel
+Belarus,2010,Import,1476000,1416527.0,72_iron_and_steel
+Belarus,2012,Export,231800,851000.0,72_iron_and_steel
+Belarus,2000,Export,168700,342967.0,72_iron_and_steel
+Belarus,2006,Import,26400900,53167098.0,72_iron_and_steel
+Belarus,2002,Export,133100,115058.0,72_iron_and_steel
+Belgium,2014,Export,26470533,20425371.0,10_cereals
+Belgium,2004,Import,293429916,558815402.0,72_iron_and_steel
+Belgium,2005,Export,2857797,83584.0,72_iron_and_steel
+Belgium,2012,Import,57288312,58375019.0,72_iron_and_steel
+Belgium,2003,Import,2461518,2814260.0,72_iron_and_steel
+Belgium,2008,Import,243567148,250169461.0,72_iron_and_steel
+Belgium,2004,Export,252141616,94657835.0,72_iron_and_steel
+Belgium,2014,Import,5134979,5743301.0,72_iron_and_steel
+Belgium,2013,Export,51531991,81980593.0,72_iron_and_steel
+Belgium,2014,Export,40113163,8453471.0,72_iron_and_steel
+Belgium,2013,Import,446505262,621248151.0,72_iron_and_steel
+Belgium-Luxembourg,1995,Import,39569140,89135312.0,72_iron_and_steel
+Belgium-Luxembourg,1996,Export,13603015,31366254.0,10_cereals
+Belgium-Luxembourg,1997,Export,15247623,8456569.0,72_iron_and_steel
+Belgium-Luxembourg,1997,Import,221286176,1932727936.0,72_iron_and_steel
+Belize,2005,Import,16751,21683.0,72_iron_and_steel
+Belize,1999,Import,736,335.0,72_iron_and_steel
+Belize,1996,Import,2577,914.0,72_iron_and_steel
+Belize,1999,Import,3777,1750.0,72_iron_and_steel
+Belize,1999,Import,605,300.0,72_iron_and_steel
+Belize,2012,Import,31420,59665.0,72_iron_and_steel
+Belize,2014,Import,32205,23135.0,72_iron_and_steel
+Belize,1998,Import,152341,270147.0,72_iron_and_steel
+Belize,2015,Import,331980,519184.0,72_iron_and_steel
+Benin,2010,Export,9020,4500.0,72_iron_and_steel
+Benin,1998,Import,68654,149804.0,72_iron_and_steel
+Benin,2015,Import,23491569,56905216.0,72_iron_and_steel
+Benin,2013,Export,2532057,2936298.0,72_iron_and_steel
+Benin,2011,Import,5259,33740.0,10_cereals
+Benin,2011,Export,9118621,60110110.0,10_cereals
+Bermuda,2013,Import,2933,756.0,72_iron_and_steel
+Bermuda,2016,Import,2703,797.0,72_iron_and_steel
+Bermuda,2012,Import,6083,,72_iron_and_steel
+Bhutan,2008,Import,5162,3682.0,72_iron_and_steel
+Bhutan,2005,Import,80829,115670.0,72_iron_and_steel
+Bhutan,2010,Import,79061,49144.0,72_iron_and_steel
+Bhutan,2007,Import,194855,49194.0,72_iron_and_steel
+Bhutan,1994,Import,684,4875.0,10_cereals
+Bhutan,1999,Import,70103,196941.0,72_iron_and_steel
+Bolivia (Plurinational State of),2008,Import,28,3.0,72_iron_and_steel
+Bolivia (Plurinational State of),2003,Export,29,90.0,10_cereals
+Bolivia (Plurinational State of),2001,Import,1727,1069.0,72_iron_and_steel
+Bolivia (Plurinational State of),2009,Import,7335752,11619422.0,72_iron_and_steel
+Bolivia (Plurinational State of),2007,Import,217863,416037.0,72_iron_and_steel
+Bolivia (Plurinational State of),2004,Import,117941,139846.0,72_iron_and_steel
+Bolivia (Plurinational State of),2012,Import,67004,157008.0,72_iron_and_steel
+Bolivia (Plurinational State of),2010,Import,3840,25657.0,72_iron_and_steel
+Bolivia (Plurinational State of),1994,Import,6871,2875.0,72_iron_and_steel
+Bosnia Herzegovina,2013,Import,157907,54523.0,72_iron_and_steel
+Bosnia Herzegovina,2016,Export,817,500.0,72_iron_and_steel
+Bosnia Herzegovina,2014,Export,1509,135.0,72_iron_and_steel
+Bosnia Herzegovina,2007,Export,124969,73973.0,72_iron_and_steel
+Bosnia Herzegovina,2007,Import,530286,376970.0,72_iron_and_steel
+Bosnia Herzegovina,2004,Export,2355,3010.0,72_iron_and_steel
+Bosnia Herzegovina,2005,Import,3606,514.0,72_iron_and_steel
+Bosnia Herzegovina,2016,Export,52904,139068.0,72_iron_and_steel
+Bosnia Herzegovina,2014,Export,8089,460.0,72_iron_and_steel
+Bosnia Herzegovina,2016,Import,733953,835263.0,72_iron_and_steel
+Botswana,2006,Import,7601,32577.0,10_cereals
+Botswana,2001,Export,1654,9375.0,72_iron_and_steel
+Botswana,2002,Import,77402,997141.0,72_iron_and_steel
+Botswana,2013,Import,455513,434666.0,72_iron_and_steel
+Botswana,2015,Export,22980,49263.0,10_cereals
+Botswana,2005,Export,1469,64245.0,72_iron_and_steel
+Botswana,2010,Import,1251,300.0,72_iron_and_steel
+Botswana,2001,Import,19499,1335.0,72_iron_and_steel
+Botswana,2012,Import,79825,77074.0,72_iron_and_steel
+Botswana,2015,Import,26488,28447.0,72_iron_and_steel
+Brazil,2012,Export,116663,9856.0,72_iron_and_steel
+Brazil,1993,Export,7357713,26272436.0,72_iron_and_steel
+Brazil,2012,Export,7801600,619246.0,72_iron_and_steel
+Brazil,1995,Import,289925,303000.0,72_iron_and_steel
+Brazil,1999,Export,202913,217822.0,10_cereals
+Brazil,1990,Export,148,89.0,72_iron_and_steel
+Brazil,2004,Export,95940660,233128884.0,72_iron_and_steel
+Brazil,1999,Export,2310481,4334818.0,72_iron_and_steel
+Brazil,1996,Export,574,742.0,72_iron_and_steel
+Brazil,2014,Export,584548,296663.0,72_iron_and_steel
+Brazil,1989,Import,8324,750.0,72_iron_and_steel
+Brazil,2014,Re-Import,1370807,1976995.0,72_iron_and_steel
+Brazil,2006,Import,79485500,956039896.0,10_cereals
+Brazil,1999,Import,204540,161274.0,72_iron_and_steel
+Brazil,2009,Import,76894,11787.0,72_iron_and_steel
+Brazil,2008,Export,65755,64975.0,72_iron_and_steel
+Brazil,2013,Export,169291,56880.0,72_iron_and_steel
+Brazil,2016,Import,48806,12000.0,72_iron_and_steel
+Brazil,2015,Export,743947,262605.0,72_iron_and_steel
+Brunei Darussalam,2014,Import,984137,690140.0,72_iron_and_steel
+Brunei Darussalam,2003,Import,21203,0.0,72_iron_and_steel
+Brunei Darussalam,1998,Import,226314,143434.0,72_iron_and_steel
+Brunei Darussalam,2004,Import,93828,120466.0,72_iron_and_steel
+Brunei Darussalam,2003,Import,177151,308244.0,72_iron_and_steel
+Brunei Darussalam,1998,Export,1,50.0,72_iron_and_steel
+Bulgaria,2004,Import,522530,25390.0,72_iron_and_steel
+Bulgaria,2005,Import,935958,2132760.0,72_iron_and_steel
+Bulgaria,2011,Import,5976914,1577092.0,72_iron_and_steel
+Bulgaria,2010,Export,1578953,2131499.0,72_iron_and_steel
+Bulgaria,2000,Export,14440284,60192508.0,72_iron_and_steel
+Bulgaria,2005,Export,20992,1002.0,72_iron_and_steel
+Bulgaria,2013,Import,1306760,3780613.0,10_cereals
+Bulgaria,2013,Export,80328,3451.0,72_iron_and_steel
+Bulgaria,2004,Export,115767,313360.0,10_cereals
+Bulgaria,2004,Import,268183,75802.0,72_iron_and_steel
+Bulgaria,1997,Import,38468,10687.0,72_iron_and_steel
+Bulgaria,1997,Export,100121,282299.0,72_iron_and_steel
+Burkina Faso,2011,Import,7628,683.0,72_iron_and_steel
+Burkina Faso,2008,Export,137757,16870000.0,72_iron_and_steel
+Burkina Faso,2015,Export,22473,23800.0,72_iron_and_steel
+Burkina Faso,2005,Export,541,29410.0,72_iron_and_steel
+Burkina Faso,2002,Import,401693,70272.0,72_iron_and_steel
+Burkina Faso,1996,Import,2406,1375.0,72_iron_and_steel
+Burkina Faso,2012,Import,59,15.0,72_iron_and_steel
+Burkina Faso,2014,Import,229064,277447.0,72_iron_and_steel
+Burundi,2006,Import,57511,78569.0,72_iron_and_steel
+Burundi,2013,Import,335519,309146.0,72_iron_and_steel
+Burundi,2003,Import,3219,0.0,72_iron_and_steel
+Burundi,2007,Import,28754,22209.0,72_iron_and_steel
+Burundi,2013,Export,1908,50.0,72_iron_and_steel
+Burundi,2001,Import,160916,380435.0,72_iron_and_steel
+Cabo Verde,2005,Import,1237745,3306951.0,10_cereals
+Cabo Verde,2000,Import,915,499.0,72_iron_and_steel
+Cabo Verde,2011,Import,73098,48490.0,72_iron_and_steel
+Cabo Verde,2009,Import,101756,26210.0,72_iron_and_steel
+Cabo Verde,2003,Import,780710,2770400.0,10_cereals
+Cabo Verde,2007,Re-Export,199,797.0,72_iron_and_steel
+Cabo Verde,2014,Import,5725,252.0,72_iron_and_steel
+Cambodia,2013,Import,216939,189601.0,72_iron_and_steel
+Cambodia,2007,Import,1264947,4231124.0,72_iron_and_steel
+Cambodia,2008,Import,29268,24010.0,72_iron_and_steel
+Cambodia,2008,Export,12392,84480.0,10_cereals
+Cambodia,2010,Import,28344,39300.0,72_iron_and_steel
+Cameroon,2013,Import,279,6.0,72_iron_and_steel
+Cameroon,2011,Import,396,4.0,72_iron_and_steel
+Cameroon,2004,Import,15547,30150.0,72_iron_and_steel
+Cameroon,2011,Export,1264,300.0,72_iron_and_steel
+Cameroon,2010,Export,1616164,7972748.0,72_iron_and_steel
+Cameroon,2009,Import,2356,556.0,72_iron_and_steel
+Cameroon,2011,Import,48295,17820.0,72_iron_and_steel
+Canada,2013,Export,186446,357547.0,10_cereals
+Canada,1999,Import,1075497,2169348.0,10_cereals
+Canada,1996,Import,1722281,2145355.0,10_cereals
+Canada,1989,Import,153826,1124000.0,10_cereals
+Canada,2014,Export,10143919,10411650.0,10_cereals
+Canada,1994,Export,657701,587389.0,10_cereals
+Central African Rep.,1996,Import,397158,1589420.0,10_cereals
+Chile,1993,Import,9648762,79959432.0,10_cereals
+Chile,2012,Export,10432,1071.0,10_cereals
+Chile,2009,Export,206,140.0,10_cereals
+China,2005,Export,51702,104450.0,10_cereals
+China,2015,Export,488000,400000.0,10_cereals
+China,2016,Export,13143526,27754449.0,10_cereals
+China,1999,Export,43909,19634.0,10_cereals
+China,2004,Export,3412110,9411780.0,10_cereals
+"China, Hong Kong SAR",2015,Import,62754,90451.0,10_cereals
+"China, Hong Kong SAR",1993,Export,319170,967000.0,10_cereals
+"China, Hong Kong SAR",2015,Export,14009528,13270141.0,10_cereals
+"China, Hong Kong SAR",1998,Import,15028,10433.0,10_cereals
+"China, Macao SAR",2011,Import,191802,805050.0,10_cereals
+Colombia,1991,Export,780914,1839000.0,10_cereals
+Colombia,2008,Import,291900,557453.0,10_cereals
+Colombia,2000,Export,5118,4800.0,10_cereals
+Comoros,2009,Import,57,210.0,10_cereals
+Costa Rica,1994,Import,1908336,10195387.0,10_cereals
+Costa Rica,1995,Import,21427548,105404992.0,10_cereals
+Costa Rica,1996,Import,143491,90799.0,10_cereals
+Costa Rica,2000,Import,53723128,483369184.0,10_cereals
+Croatia,2000,Export,44113,136895.0,10_cereals
+Croatia,1996,Export,19,0.0,10_cereals
+Croatia,1998,Import,2342,0.0,10_cereals
+Croatia,2011,Export,3068,1643.0,10_cereals
+Croatia,2014,Import,14669,18933.0,10_cereals
+Cuba,2001,Import,23617572,151692432.0,10_cereals
+Cyprus,2003,Export,1799,1053.0,10_cereals
+Cyprus,2005,Export,542,600.0,10_cereals
+Cyprus,2014,Import,6441520,5730558.0,10_cereals
+Cyprus,2006,Import,17085,17496.0,10_cereals
+Czech Rep.,2004,Export,3009854,20252610.0,10_cereals
+Czech Rep.,2005,Import,21478,102108.0,10_cereals
+Côte d'Ivoire,1998,Export,356549,542082.0,10_cereals
+Côte d'Ivoire,2011,Import,9383,27504.0,10_cereals
+Côte d'Ivoire,2005,Import,218427832,691091603.0,10_cereals
+Denmark,1989,Import,1079379,2563025.0,10_cereals
+Denmark,2005,Import,141203,135758.0,10_cereals
+Denmark,1993,Import,28096232,87838688.0,10_cereals
+Denmark,1997,Import,878473,3035256.0,10_cereals
+Denmark,2004,Import,25807781,29484152.0,10_cereals
+Denmark,1997,Export,241833,205180.0,10_cereals
+Dominican Rep.,2008,Import,7617110,22487308.0,10_cereals
+Ecuador,1998,Export,86350,58986.0,10_cereals
+Ecuador,2006,Import,3223,4083.0,10_cereals
+Ecuador,2001,Import,530983,401729.0,10_cereals
+Ecuador,2012,Import,1033128,1234312.0,10_cereals
+Egypt,2012,Import,12718246,36172047.0,10_cereals
+El Salvador,2003,Import,155243,379047.0,10_cereals
+El Salvador,2011,Export,174542,46693.0,10_cereals
+Estonia,1997,Import,164692,419608.0,10_cereals
+Estonia,2000,Export,1526784,15054930.0,10_cereals
+Estonia,1995,Export,15496,34632.0,10_cereals
+Estonia,2010,Import,288606,252184.0,10_cereals
+Estonia,2006,Import,77311,82576.0,10_cereals
+Ethiopia,2015,Export,269570,358900.0,10_cereals
+Ethiopia,2016,Export,313,60.0,10_cereals
+FS Micronesia,2011,Import,569,2106.0,10_cereals
+Faeroe Isds,1999,Import,127,128.0,10_cereals
+Faeroe Isds,2002,Import,167,72.0,10_cereals
+Fiji,2012,Re-Export,397795,323249.0,10_cereals
+Fiji,2002,Export,758,2000.0,10_cereals
+Finland,2001,Export,32,10.0,10_cereals
+Finland,1992,Import,24691,19374.0,10_cereals
+Finland,2013,Import,53544,8629.0,10_cereals
+Finland,2009,Export,9672,3332.0,10_cereals
+Finland,2008,Import,6322,719.0,10_cereals
+Fmr Sudan,1996,Export,133,1475.0,10_cereals
+Fmr Sudan,2000,Import,30,1.0,10_cereals
+France,2003,Import,181235892,228435600.0,10_cereals
+France,2001,Import,7330970,46469962.0,10_cereals
+France,2000,Export,9200082,73263500.0,10_cereals
+France,2014,Export,1235640477,5122036860.0,10_cereals
+French Polynesia,2004,Import,104,20.0,10_cereals
+French Polynesia,1999,Export,89,10.0,10_cereals
+Gabon,2001,Import,826,1546.0,10_cereals
+Gambia,2010,Re-Export,212957,844250.0,10_cereals
+Georgia,2014,Import,551193,915617.0,10_cereals
+Germany,1993,Export,138924000,1073140096.0,10_cereals
+Germany,1993,Export,2401000,9289004.0,10_cereals
+Germany,1998,Import,899000,2232000.0,10_cereals
+Germany,2001,Import,17149000,125389900.0,10_cereals
+Germany,2011,Import,81189451,267209651.0,10_cereals
+Ghana,2006,Export,167,441.0,10_cereals
+Ghana,1997,Export,66397,326208.0,10_cereals
+Greece,1989,Import,214764,750831.0,10_cereals
+Greece,2015,Import,183384,169014.0,10_cereals
+Greece,2015,Import,338834,398936.0,10_cereals
+Greenland,2008,Import,42480,19659.0,10_cereals
+Grenada,1995,Import,1501400,15687363.0,10_cereals
+Grenada,2009,Import,291042,376614.0,10_cereals
+Guatemala,2004,Export,395759,763741.0,10_cereals
+Guatemala,2010,Import,145990896,629317810.0,10_cereals
+Guyana,2002,Import,14971,18967.0,10_cereals
+Guyana,2010,Export,52693638,119359265.0,10_cereals
+Honduras,1998,Import,24615,47484.0,10_cereals
+Hungary,2013,Import,2351368,5758404.0,10_cereals
+Hungary,2006,Import,16687000,38020200.0,10_cereals
+Hungary,1998,Export,29157000,32300266.0,10_cereals
+Hungary,1996,Export,807000,5345299.0,10_cereals
+Hungary,1994,Export,14472000,137863008.0,10_cereals
+Hungary,2015,Export,3550912,5680500.0,10_cereals
+India,2015,Export,20480151,20459137.0,10_cereals
+India,1994,Import,6197,53000.0,10_cereals
+Indonesia,1999,Export,2477819,9690330.0,10_cereals
+Indonesia,2003,Import,166407647,1343326420.0,10_cereals
+Indonesia,2003,Export,28763,45966.0,10_cereals
+Indonesia,2006,Export,42465,6082.0,10_cereals
+Ireland,2004,Import,840363,399290.0,10_cereals
+Ireland,1998,Export,6029,4187.0,10_cereals
+Ireland,1995,Import,70832632,312898432.0,10_cereals
+Israel,1998,Import,472000,0.0,10_cereals
+Italy,2013,Import,51927398,45187740.0,10_cereals
+Italy,1999,Import,91562726,625617095.0,10_cereals
+Italy,1999,Import,7863858,17165731.0,10_cereals
+Jamaica,1991,Import,3755898,25471714.0,10_cereals
+Jamaica,2002,Import,94844,232582.0,10_cereals
+Jamaica,2007,Import,2796,805.0,10_cereals
+Japan,2005,Import,270367862,1429904992.0,10_cereals
+Japan,2011,Export,658268,188550.0,10_cereals
+Japan,1999,Export,24504,2000.0,10_cereals
+Japan,2015,Import,4045658,833000.0,10_cereals
+Jordan,2016,Export,167235,576400.0,10_cereals
+Jordan,1997,Export,872530,1910713.0,10_cereals
+Jordan,2015,Re-Export,8643785,38983580.0,10_cereals
+Kazakhstan,2000,Export,40062100,608011000.0,10_cereals
+Kazakhstan,2002,Export,6400,40000.0,10_cereals
+Kenya,1999,Import,801346,5863325.0,10_cereals
+Kenya,2007,Import,36209108,131404098.0,10_cereals
+Kuwait,2015,Import,256049,613714.0,10_cereals
+Kuwait,2006,Import,6513,4263.0,10_cereals
+Kyrgyzstan,2012,Import,9420522,18034471.0,10_cereals
+Kyrgyzstan,2005,Import,17439255,157942792.0,10_cereals
+Kyrgyzstan,2016,Import,167,87.0,10_cereals
+Lao People's Dem. Rep.,2016,Export,25967003,34541540.0,10_cereals
+Latvia,1994,Import,698,10000.0,10_cereals
+Latvia,1997,Export,10,7.0,10_cereals
+Lebanon,2011,Import,148593,74987.0,10_cereals
+Lesotho,2000,Import,1844,0.0,10_cereals
+Lesotho,2002,Import,738141,0.0,10_cereals
+Lesotho,2010,Export,8476,2424.0,10_cereals
+Libya,2008,Import,94263,231526.0,10_cereals
+Lithuania,2016,Export,6225,3146.0,10_cereals
+Lithuania,2004,Export,132668,967600.0,10_cereals
+Lithuania,2014,Export,6455979,13390688.0,10_cereals
+Lithuania,2004,Import,10637,17000.0,10_cereals
+Lithuania,2002,Import,278465,342694.0,10_cereals
+Luxembourg,1999,Export,1229317,8758124.0,10_cereals
+Luxembourg,2015,Import,2911,2137.0,10_cereals
+Madagascar,1994,Export,62,148.0,10_cereals
+Madagascar,1990,Import,5806,9534.0,10_cereals
+Malawi,2008,Import,75,455.0,10_cereals
+Malaysia,2012,Export,27,20.0,10_cereals
+Malaysia,2006,Import,6402,34640.0,10_cereals
+Malaysia,1998,Export,82065,30459.0,10_cereals
+Malaysia,2009,Import,2569186,4058616.0,10_cereals
+Maldives,2010,Import,1226,1216.0,10_cereals
+Maldives,2007,Import,14572,1449.0,10_cereals
+Maldives,1998,Import,162,120.0,10_cereals
+Malta,2014,Import,39664,91248.0,10_cereals
+Malta,2005,Import,2481,3346.0,10_cereals
+Malta,2005,Import,133200,459772.0,10_cereals
+Malta,1999,Import,489382,1534062.0,10_cereals
+Martinique,1994,Import,440894,1669871.0,10_cereals
+Mauritania,2006,Import,214287,1577115.0,10_cereals
+Mauritania,2000,Import,11038816,74483738.0,10_cereals
+Mauritius,2016,Export,3936,9253.0,10_cereals
+Mauritius,2014,Import,48350822,143049428.0,10_cereals
+Mauritius,2006,Import,56363,114524.0,10_cereals
+Mexico,2007,Export,1499,1765.0,10_cereals
+Mexico,2009,Export,14224,7882.0,10_cereals
+Mexico,2008,Export,10866,40312.0,10_cereals
+Mexico,1994,Import,4818000,41055124.0,10_cereals
+Mongolia,2004,Import,36104,437900.0,10_cereals
+Montenegro,2006,Import,2856515,18414261.0,10_cereals
+Montenegro,2013,Import,25,3.0,10_cereals
+Montserrat,2004,Import,39,23.0,10_cereals
+Morocco,2003,Import,371125,760250.0,10_cereals
+Morocco,1995,Import,403904608,2288180992.0,10_cereals
+Morocco,2001,Export,15,10.0,10_cereals
+Morocco,2004,Import,140324627,565825271.0,10_cereals
+Mozambique,2003,Import,11068998,21135797.0,10_cereals
+Mozambique,2009,Import,1057347,1814163.0,10_cereals
+Myanmar,2016,Import,394765,683025.0,10_cereals
+Namibia,2007,Import,13823755,1684909744.0,10_cereals
+Netherlands,2014,Export,27371602,46694051.0,10_cereals
+Netherlands,2000,Import,229791690,1815807841.0,10_cereals
+Netherlands,2007,Import,61751172,124882460.0,10_cereals
+Netherlands,1994,Export,6261890,14503109.0,10_cereals
+New Caledonia,2002,Export,25,0.0,10_cereals
+New Caledonia,2009,Import,4757575,16497684.0,10_cereals
+New Caledonia,2013,Export,7503,2305.0,10_cereals
+New Zealand,2013,Export,91081,83358.0,10_cereals
+New Zealand,1990,Import,3521023,23259148.0,10_cereals
+New Zealand,2006,Import,2146753,826047.0,10_cereals
+New Zealand,1989,Re-Export,11413,8919.0,10_cereals
+Nicaragua,2014,Import,3589105,11432651.0,10_cereals
+Nicaragua,2003,Import,10,3.0,10_cereals
+Nicaragua,2004,Export,6300,46730.0,10_cereals
+Niger,2014,Export,1047,3250.0,10_cereals
+Niger,2001,Import,38131806,155963996.0,10_cereals
+Niger,2002,Import,423083,977685.0,10_cereals
+Nigeria,2007,Export,16190,,10_cereals
+Norway,1996,Export,51968,70437.0,10_cereals
+Norway,2009,Import,8129002,32367803.0,10_cereals
+Oman,2010,Import,9644491,38222355.0,10_cereals
+Oman,2012,Export,3510020,5216666.0,10_cereals
+Oman,2005,Export,15121,73573.0,10_cereals
+Oman,1994,Import,12707,16616.0,10_cereals
+"Other Asia, nes",2011,Export,4787,7000.0,10_cereals
+"Other Asia, nes",2004,Import,40693051,118282253.0,10_cereals
+Pakistan,2008,Import,1142626,6331000.0,10_cereals
+Pakistan,2005,Import,1047,4000.0,10_cereals
+Palau,2016,Import,64,8.0,10_cereals
+Palau,2012,Import,8286,4167.0,10_cereals
+Panama,2009,Re-Export,450,204.0,10_cereals
+Panama,2002,Import,8744,20600.0,10_cereals
+Paraguay,1996,Import,96927,93163.0,10_cereals
+Paraguay,2005,Import,110,108.0,10_cereals
+Paraguay,2014,Export,801724,3855310.0,10_cereals
+Peru,1992,Export,2520,2812.0,10_cereals
+Peru,1992,Export,1419,546.0,10_cereals
+Peru,2002,Export,757355,953330.0,10_cereals
+Philippines,2010,Import,5232260,11341322.0,10_cereals
+Poland,1999,Import,8480000,95994104.0,10_cereals
+Poland,2011,Export,861,1000.0,10_cereals
+Poland,2000,Export,92000,55626.0,10_cereals
+Portugal,1995,Import,1575991,3799053.0,10_cereals
+Portugal,2004,Import,68100264,385980411.0,10_cereals
+Portugal,2007,Import,5301072,20322362.0,10_cereals
+Portugal,2004,Import,550720,1334182.0,10_cereals
+Qatar,2002,Import,351,1000.0,10_cereals
+Rep. of Korea,2009,Import,1886217,3978374.0,10_cereals
+Rep. of Korea,2011,Import,16516711,53317667.0,10_cereals
+Rep. of Korea,2005,Import,11976818,63172747.0,10_cereals
+Rep. of Korea,1997,Export,3738,2406.0,10_cereals
+Rep. of Moldova,2005,Export,13400578,138534609.0,10_cereals
+Rep. of Moldova,1999,Export,4803375,748703.0,10_cereals
+Romania,2009,Export,49697740,41349296.0,10_cereals
+Romania,2014,Import,1938473,2189990.0,10_cereals
+Romania,2008,Export,11341,22000.0,10_cereals
+Russian Federation,2015,Import,6114128,47936769.0,10_cereals
+Russian Federation,2003,Export,148852,255261.0,10_cereals
+Rwanda,2002,Import,104510,517727.0,10_cereals
+Rwanda,2015,Export,9421633,11321091.0,10_cereals
+Saint Kitts and Nevis,2003,Import,3718,4216.0,10_cereals
+Saint Kitts and Nevis,1997,Import,553868,951061.0,10_cereals
+Saint Lucia,1997,Import,29,23.0,10_cereals
+Saint Lucia,1994,Import,71,66.0,10_cereals
+Saint Vincent and the Grenadines,1995,Export,4279036,7268542.0,10_cereals
+Saint Vincent and the Grenadines,2000,Import,49121,58292.0,10_cereals
+Samoa,2001,Export,384,414.0,10_cereals
+Samoa,2013,Import,663190,757232.0,10_cereals
+Sao Tome and Principe,2012,Import,141,12.0,10_cereals
+Saudi Arabia,2006,Import,26702,40000.0,10_cereals
+Saudi Arabia,2007,Import,26509088,49287000.0,10_cereals
+Saudi Arabia,2009,Re-Export,4059853,24494000.0,10_cereals
+Saudi Arabia,1991,Export,16,40.0,10_cereals
+Saudi Arabia,1992,Re-Export,667,699.0,10_cereals
+Saudi Arabia,1998,Re-Export,23164,55242.0,10_cereals
+Senegal,2003,Import,175,88.0,10_cereals
+Serbia,2011,Export,6060,4518.0,10_cereals
+Serbia,2015,Import,689997,1555920.0,10_cereals
+Serbia,2014,Import,90382,90302.0,10_cereals
+Serbia and Montenegro,1997,Export,54000,119000.0,10_cereals
+Serbia and Montenegro,2004,Import,361,699.0,10_cereals
+Seychelles,1994,Re-Export,505,1250.0,10_cereals
+Seychelles,2006,Import,45,4.0,10_cereals
+Sierra Leone,2016,Import,228651,550511.0,10_cereals
+Singapore,1997,Import,209,57.0,10_cereals
+Singapore,1989,Import,230269,1179289.0,10_cereals
+Singapore,2003,Import,30176697,171689126.0,10_cereals
+Slovakia,2009,Import,754558,661276.0,10_cereals
+Slovakia,2001,Export,6551,12183.0,10_cereals
+Slovakia,2005,Export,169101,855323.0,10_cereals
+Slovakia,2005,Export,610852,4449915.0,10_cereals
+Slovenia,2007,Import,172315,825438.0,10_cereals
+Slovenia,2008,Export,37199,17419.0,10_cereals
+South Africa,2013,Import,482277,170288.0,10_cereals
+South Africa,2014,Re-Import,137761,312511.0,10_cereals
+South Africa,2001,Export,52415,155294.0,10_cereals
+South Africa,2004,Export,232712,722180.0,10_cereals
+South Africa,2009,Export,405690677,1598314155.0,10_cereals
+Spain,2012,Export,1554,626.0,10_cereals
+Spain,2002,Import,51461908,114172911.0,10_cereals
+Spain,1991,Import,2940628,7622436.0,10_cereals
+Sri Lanka,1990,Export,11250,18828.0,10_cereals
+Sri Lanka,1993,Export,50603,0.0,10_cereals
+Sri Lanka,2008,Export,29619,26692.0,10_cereals
+State of Palestine,2014,Export,89,170.0,10_cereals
+State of Palestine,2007,Export,216590,1131487.0,10_cereals
+Suriname,2006,Import,53200,193972.0,10_cereals
+Suriname,2008,Re-Export,174,83.0,10_cereals
+Suriname,2002,Import,30915,54566.0,10_cereals
+Suriname,2006,Import,54689,88152.0,10_cereals
+Swaziland,2001,Export,4428,14660.0,10_cereals
+Swaziland,2000,Import,5219746,11470112.0,10_cereals
+Sweden,1999,Import,313792,980000.0,10_cereals
+Sweden,1996,Import,30993308,28004624.0,10_cereals
+Sweden,2013,Import,1279902,1199598.0,10_cereals
+Sweden,2016,Export,421684,373174.0,10_cereals
+Switzerland,2003,Import,28154509,111212501.0,10_cereals
+Switzerland,1988,Import,18375112,98544944.0,10_cereals
+Switzerland,2005,Import,10826398,40641102.0,10_cereals
+Switzerland,2012,Import,28353501,68574485.0,10_cereals
+TFYR of Macedonia,2008,Import,71450,263600.0,10_cereals
+TFYR of Macedonia,2001,Export,15349,76020.0,10_cereals
+Thailand,1990,Import,8583985,42772134.0,10_cereals
+Thailand,2003,Import,13122,20175.0,10_cereals
+Thailand,1993,Import,7414706,43474027.0,10_cereals
+Thailand,1995,Export,18807320,105476624.0,10_cereals
+Tonga,2013,Import,8918,1816.0,10_cereals
+Trinidad and Tobago,2000,Export,4289,798.0,10_cereals
+Trinidad and Tobago,2013,Import,15357371,22989059.0,10_cereals
+Trinidad and Tobago,1991,Import,89420,215998.0,10_cereals
+Tunisia,1992,Export,418274,1010000.0,10_cereals
+Tunisia,2013,Import,208386928,546808748.0,10_cereals
+Tunisia,2011,Import,266572075,850177834.0,10_cereals
+Tunisia,1998,Export,1331,2062.0,10_cereals
+Turkey,2008,Export,1527,1800.0,10_cereals
+Turkey,1995,Import,986096,315037.0,10_cereals
+Turkey,2007,Export,6662,10000.0,10_cereals
+Turkmenistan,1999,Import,22551,0.0,10_cereals
+Turks and Caicos Isds,2012,Import,139022,182976.0,10_cereals
+Tuvalu,2002,Import,409,569.0,10_cereals
+USA,2009,Export,59386107,72772097.0,10_cereals
+USA,1994,Re-Export,152268,253186.0,10_cereals
+USA,2011,Import,2975027,1399886.0,10_cereals
+USA,1998,Import,2971551,3639278.0,10_cereals
+USA,2012,Export,572431831,1533021968.0,10_cereals
+Uganda,2008,Re-Export,3659,4292.0,10_cereals
+Uganda,2005,Import,12683689,44821723.0,10_cereals
+Ukraine,1997,Import,1044318,7113908.0,10_cereals
+Ukraine,2010,Export,6032334,38421666.0,10_cereals
+Ukraine,2010,Import,552731,1091878.0,10_cereals
+Ukraine,2004,Export,530090,5536410.0,10_cereals
+United Arab Emirates,2015,Import,119598,149863.0,10_cereals
+United Kingdom,1993,Import,1234327,576472.0,10_cereals
+United Kingdom,2014,Import,9458167,17628509.0,10_cereals
+United Kingdom,2012,Import,388071404,1235716819.0,10_cereals
+United Kingdom,1996,Import,37167600,94223616.0,10_cereals
+United Kingdom,1993,Export,657049,1335037.0,10_cereals
+United Rep. of Tanzania,2007,Import,100,76.0,10_cereals
+United Rep. of Tanzania,2002,Import,47,16.0,10_cereals
+United Rep. of Tanzania,2001,Export,1274,7500.0,10_cereals
+United Rep. of Tanzania,2004,Import,2037776,8287040.0,10_cereals
+Uruguay,1996,Export,478498,3760437.0,10_cereals
+Venezuela,1997,Export,789827,4649749.0,10_cereals
+Venezuela,2001,Export,516800,5398576.0,10_cereals
+Viet Nam,2009,Import,302365897,938376944.0,10_cereals
+Viet Nam,2009,Export,728929,2760118.0,10_cereals
+Yemen,2011,Export,1877,200.0,10_cereals
+Yemen,2007,Export,71872,284900.0,10_cereals
+Yemen,2005,Import,15453,56506.0,10_cereals
+Zambia,2005,Export,106594,219205.0,10_cereals
+Zambia,1996,Import,29969,0.0,10_cereals
+Zambia,2009,Export,97332,132247.0,10_cereals
+Zimbabwe,2015,Export,25,15.0,10_cereals
+Zimbabwe,2008,Import,1408624,1336371.0,10_cereals
+Zimbabwe,2014,Import,110790055,283873091.0,10_cereals
