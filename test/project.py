@@ -133,11 +133,6 @@ df_net.boxplot(column='net_usd', by='category', ax=ax)
 plt.xlabel('category')
 plt.ylabel('net_usd')
 
-# Vera: Heatmap
-corr=df_net.corr(numeric_only=True)
-sns.heatmap(corr, cmap='coolwarm', center=0, annot=True)
-plt.title('Correlation Heatmap')
-
 # Vera: Scatter Plot by Category
 fig, ax = plt.subplots(figsize=(10, 6))
 sns.scatterplot(x='net_imports', y='net_export', hue='country_or_area', data=df_net)
