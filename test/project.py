@@ -3,6 +3,14 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
 import seaborn as sns
+from sklearn.cluster import KMeans
+from sklearn.preprocessing import StandardScaler
+from sklearn.metrics import pairwise_distances
+from scipy.cluster.hierarchy import dendrogram, linkage
+from sklearn.cluster import AgglomerativeClustering
+from tslearn.utils import to_time_series_dataset
+from tslearn.clustering import TimeSeriesKMeans
+
 
 ##### Oliver - Read CSV
 df = read_csv("case2.csv", sep=";")
@@ -103,7 +111,6 @@ print(df_net_IronAndSteel.head())
 fig, ax = plt.subplots(figsize=(12, 8))
 df_net.plot.scatter(x="year", y="net_usd", ax=ax)
 plt.title("Net_USD per Year")
-# plt.show()
 
 # Vera: Bar Chart Top Players in Cereals
 fig, ax = plt.subplots(figsize=(10, 6))
@@ -146,18 +153,13 @@ plt.show()
 #Thao: K-Means
 # =======
 #K-Means
-# >>>>>>> origin/master
-from sklearn.cluster import KMeans
-from sklearn.preprocessing import StandardScaler
-from sklearn.metrics import pairwise_distances
 
 # 1. Aggregate per country
 df_cluster = (
     df_net
     .groupby('country_or_area')[['net_imports', 'net_export', 'net_usd']]
     .mean()
-    .reset_index()
-)
+    .reset_index())
 
 # 2. Scale
 scaler = StandardScaler()
@@ -241,7 +243,6 @@ heatmap_data = (
 
 print(heatmap_data)
 
-from sklearn.preprocessing import StandardScaler
 
 scaler_hm = StandardScaler()
 heatmap_scaled = pd.DataFrame(
@@ -276,7 +277,6 @@ sns.clustermap(
 )
 
 #Hierarchical Clustering: Agglomerative
-from scipy.cluster.hierarchy import dendrogram, linkage
 
 # Linkage matrix
 Z = linkage(X_scaled, method='ward')
@@ -295,7 +295,6 @@ plt.ylabel('Distance')
 plt.tight_layout()
 plt.show()
 
-from sklearn.cluster import AgglomerativeClustering
 
 agg = AgglomerativeClustering(
     n_clusters=3,
@@ -334,7 +333,7 @@ df_net = df_net.merge(
     on='country_or_area',
     how='left'
 )
-# <<<<<<< HEAD
+
 #Time-Series K-Means for cereals
 import pandas as pd
 import numpy as np
@@ -348,18 +347,13 @@ ts_data = df_cat.pivot(index='country_or_area', columns='year', values='net_usd'
 
 print(ts_data.head())
 
-from sklearn.preprocessing import StandardScaler
 
 scaler = StandardScaler()
 ts_scaled = scaler.fit_transform(ts_data)
 
-from tslearn.utils import to_time_series_dataset
 
 ts_scaled_3d = to_time_series_dataset(ts_scaled)
 print(ts_scaled_3d.shape)  # (n_countries, n_years, 1)
-
-from tslearn.clustering import TimeSeriesKMeans
-import matplotlib.pyplot as plt
 
 # Choose number of clusters
 n_clusters = 3
@@ -409,16 +403,13 @@ df_cat = df_net[df_net['category'] == category]
 ts_data = df_cat.pivot(index='country_or_area', columns='year', values='net_usd').fillna(0)
 
 # Scale each country's series
-from sklearn.preprocessing import StandardScaler
 scaler = StandardScaler()
 ts_scaled = scaler.fit_transform(ts_data)
 
 # Convert to tslearn 3D format
-from tslearn.utils import to_time_series_dataset
 ts_scaled_3d = to_time_series_dataset(ts_scaled)
 
 # Time-Series K-Means clustering
-from tslearn.clustering import TimeSeriesKMeans
 n_clusters = 3
 km = TimeSeriesKMeans(n_clusters=n_clusters, metric="dtw", max_iter=50, random_state=42)
 labels = km.fit_predict(ts_scaled_3d)
@@ -427,7 +418,6 @@ labels = km.fit_predict(ts_scaled_3d)
 ts_data['cluster_ts'] = labels
 
 # Plot clusters
-import matplotlib.pyplot as plt
 plt.figure(figsize=(12,6))
 for c in range(n_clusters):
     cluster_members = ts_data[ts_data['cluster_ts'] == c].drop(columns='cluster_ts')
