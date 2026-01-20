@@ -164,8 +164,7 @@ df_cluster = (
 # 2. Scale
 scaler = StandardScaler()
 X_scaled = scaler.fit_transform(
-    df_cluster[['net_imports', 'net_export', 'net_usd']]
-)
+    df_cluster[['net_imports', 'net_export', 'net_usd']])
 
 # 3. Elbow method
 inertia = []
@@ -189,16 +188,14 @@ df_cluster['cluster'] = kmeans.fit_predict(X_scaled)
 # 5. Cluster centroids in ORIGINAL units
 centroids = pd.DataFrame(
     scaler.inverse_transform(kmeans.cluster_centers_),
-    columns=['net_imports', 'net_export', 'net_usd']
-)
+    columns=['net_imports', 'net_export', 'net_usd'])
 
 print("Cluster centroids (original scale):")
 print(centroids)
 
 # 6. Euclidean distances between cluster centers (scaled space)
 Euclidean = pd.DataFrame(
-    pairwise_distances(kmeans.cluster_centers_, metric='euclidean')
-)
+    pairwise_distances(kmeans.cluster_centers_, metric='euclidean'))
 
 print("Euclidean distances between clusters:")
 print(Euclidean)
@@ -207,8 +204,7 @@ print(Euclidean)
 cluster_summary = (
     df_cluster
     .groupby('cluster')[['net_imports', 'net_export', 'net_usd']]
-    .mean()
-)
+    .mean())
 
 print(cluster_summary)
 
@@ -219,8 +215,7 @@ sns.scatterplot(
     x='net_imports',
     y='net_export',
     hue='cluster',
-    palette='Set2'
-)
+    palette='Set2')
 plt.title('K-Means Clustering of Countries by Trade')
 plt.xlabel('Average Net Imports')
 plt.ylabel('Average Net Exports')
@@ -231,15 +226,14 @@ plt.show()
 df_net = df_net.merge(
     df_cluster[['country_or_area', 'cluster']],
     on='country_or_area',
-    how='left'
-)
+    how='left')
+
 #K-Means HeatMap
 # Cluster-level averages
 heatmap_data = (
     df_cluster
     .groupby('cluster')[['net_imports', 'net_export', 'net_usd']]
-    .mean()
-)
+    .mean())
 
 print(heatmap_data)
 
@@ -248,8 +242,7 @@ scaler_hm = StandardScaler()
 heatmap_scaled = pd.DataFrame(
     scaler_hm.fit_transform(heatmap_data),
     index=heatmap_data.index,
-    columns=heatmap_data.columns
-)
+    columns=heatmap_data.columns)
 
 print(heatmap_scaled)
 
@@ -259,8 +252,7 @@ sns.heatmap(
     annot=True,
     cmap='coolwarm',
     center=0,
-    linewidths=0.5
-)
+    linewidths=0.5)
 
 plt.title('Cluster Heatmap: Trade Indicators (K-Means)')
 plt.xlabel('Trade Indicators')
@@ -273,8 +265,7 @@ sns.clustermap(
     cmap='coolwarm',
     center=0,
     annot=True,
-    figsize=(8, 6)
-)
+    figsize=(8, 6))
 
 #Hierarchical Clustering: Agglomerative
 
@@ -286,8 +277,7 @@ dendrogram(
     Z,
     labels=df_cluster['country_or_area'].values,
     leaf_rotation=90,
-    leaf_font_size=8
-)
+    leaf_font_size=8)
 
 plt.title('Hierarchical Clustering Dendrogram (Ward)')
 plt.xlabel('Country')
@@ -298,8 +288,7 @@ plt.show()
 
 agg = AgglomerativeClustering(
     n_clusters=5,
-    linkage='ward'
-)
+    linkage='ward')
 
 df_cluster['cluster_hier'] = agg.fit_predict(X_scaled)
 
@@ -308,8 +297,7 @@ print(df_cluster.head())
 hier_summary = (
     df_cluster
     .groupby('cluster_hier')[['net_imports', 'net_export', 'net_usd']]
-    .mean()
-)
+    .mean())
 
 print(hier_summary)
 
@@ -319,8 +307,7 @@ sns.scatterplot(
     x='net_imports',
     y='net_export',
     hue='cluster_hier',
-    palette='Set1'
-)
+    palette='Set1')
 
 plt.title('Hierarchical Clustering of Countries by Trade')
 plt.xlabel('Average Net Imports')
@@ -331,26 +318,17 @@ plt.show()
 df_net = df_net.merge(
     df_cluster[['country_or_area', 'cluster_hier']],
     on='country_or_area',
-    how='left'
-)
+    how='left')
 
 #Time-Series K-Means for cereals
-import pandas as pd
-import numpy as np
-
-# Select category (e.g., cereals)
-category = '10_cereals'
-df_cat = df_net[df_net['category'] == category]
 
 # Pivot to get time series: rows = countries, columns = years
-ts_data = df_cat.pivot(index='country_or_area', columns='year', values='net_usd').fillna(0)
+ts_data = df_net_cereals.pivot(index='country_or_area', columns='year', values='net_usd').fillna(0)
 
 print(ts_data.head())
 
-
 scaler = StandardScaler()
 ts_scaled = scaler.fit_transform(ts_data)
-
 
 ts_scaled_3d = to_time_series_dataset(ts_scaled)
 print(ts_scaled_3d.shape)  # (n_countries, n_years, 1)
@@ -373,7 +351,7 @@ for c in range(n_clusters):
         plt.plot(cluster_members.columns, cluster_members.loc[country], alpha=0.5)
     plt.plot(cluster_members.columns, cluster_members.mean(), linewidth=3, label=f'Cluster {c} Mean')
 
-plt.title(f'Time-Series Clustering of Countries - {category}')
+plt.title(f'Time-Series Clustering of Countries - {'10_cereals'}')
 plt.xlabel('Year')
 plt.ylabel('Net Trade (scaled)')
 plt.legend()
@@ -388,17 +366,14 @@ df_net = df_net.merge(
     ts_data['cluster_ts'].reset_index(),
     left_on='country_or_area',
     right_on='country_or_area',
-    how='left'
-)
+    how='left')
 
 print(df_net[['country_or_area', 'cluster_ts']].drop_duplicates())
 
-# Select iron & steel category
-category = '72_iron_and_steel'
-df_cat = df_net[df_net['category'] == category]
+# Time Series K Means for Iron&Steel
 
 # Pivot to time-series format
-ts_data = df_cat.pivot(index='country_or_area', columns='year', values='net_usd').fillna(0)
+ts_data = df_net_IronAndSteel.pivot(index='country_or_area', columns='year', values='net_usd').fillna(0)
 
 # Scale each country's series
 scaler = StandardScaler()
@@ -423,7 +398,8 @@ for c in range(n_clusters):
         plt.plot(cluster_members.columns, cluster_members.loc[country], alpha=0.5)
     plt.plot(cluster_members.columns, cluster_members.mean(), linewidth=3, label=f'Cluster {c} Mean')
 
-plt.title(f'Time-Series Clustering of Countries - {category}')
+plt.title(f'Time-Series Clustering of Countries - {'72_iron_and_steel'}')
+plt.xlabel('Year')
 plt.xlabel('Year')
 plt.ylabel('Net Trade (scaled)')
 plt.legend()
@@ -440,8 +416,7 @@ df_net = df_net.merge(
     ts_data['cluster_ts'].reset_index().rename(columns={'cluster_ts':'cluster_ts_iron_steel'}),
     left_on='country_or_area',
     right_on='country_or_area',
-    how='left'
-)
+    how='left')
 
 print(df_net[['country_or_area','cluster_ts_iron_steel']].drop_duplicates())
 
@@ -452,7 +427,7 @@ for c in range(n_clusters):
         plt.plot(cluster_members.columns, cluster_members.loc[country], alpha=0.5)
 cluster_members.to_csv("cluster_members.csv", index=False)
 
-plt.title(f'Time-Series Clustering of Countries - {category}')
+plt.title(f'Time-Series Clustering of Countries - {'72_iron_and_steel'}')
 plt.xlabel('Year')
 plt.ylabel('Net Trade (scaled)')
 plt.show()
