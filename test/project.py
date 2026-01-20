@@ -182,7 +182,7 @@ plt.title('Elbow Method for Optimal k')
 plt.grid(True)
 plt.show()
 
-# 4. Final K-Means (k = 3)
+# 4. Final K-Means (k = 5)
 kmeans = KMeans(n_clusters=5, random_state=42, n_init=10)
 df_cluster['cluster'] = kmeans.fit_predict(X_scaled)
 
