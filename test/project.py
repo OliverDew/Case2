@@ -148,7 +148,7 @@ plt.xlabel('net_imports')
 plt.ylabel('net_export')
 plt.legend(title='Country')
 
-plt.show()
+# plt.show()
 
 #Thao: K-Means
 # =======
@@ -183,7 +183,7 @@ plt.grid(True)
 plt.show()
 
 # 4. Final K-Means (k = 3)
-kmeans = KMeans(n_clusters=3, random_state=42, n_init=10)
+kmeans = KMeans(n_clusters=5, random_state=42, n_init=10)
 df_cluster['cluster'] = kmeans.fit_predict(X_scaled)
 
 # 5. Cluster centroids in ORIGINAL units
@@ -297,7 +297,7 @@ plt.show()
 
 
 agg = AgglomerativeClustering(
-    n_clusters=3,
+    n_clusters=5,
     linkage='ward'
 )
 
@@ -356,7 +356,7 @@ ts_scaled_3d = to_time_series_dataset(ts_scaled)
 print(ts_scaled_3d.shape)  # (n_countries, n_years, 1)
 
 # Choose number of clusters
-n_clusters = 3
+n_clusters = 5
 
 km = TimeSeriesKMeans(n_clusters=n_clusters, metric="dtw", max_iter=50, random_state=42)
 labels = km.fit_predict(ts_scaled_3d)
@@ -393,8 +393,6 @@ df_net = df_net.merge(
 
 print(df_net[['country_or_area', 'cluster_ts']].drop_duplicates())
 
-plt.figure(figsize=(12,6))
-
 # Select iron & steel category
 category = '72_iron_and_steel'
 df_cat = df_net[df_net['category'] == category]
@@ -410,7 +408,7 @@ ts_scaled = scaler.fit_transform(ts_data)
 ts_scaled_3d = to_time_series_dataset(ts_scaled)
 
 # Time-Series K-Means clustering
-n_clusters = 3
+n_clusters = 5
 km = TimeSeriesKMeans(n_clusters=n_clusters, metric="dtw", max_iter=50, random_state=42)
 labels = km.fit_predict(ts_scaled_3d)
 
@@ -452,14 +450,11 @@ for c in range(n_clusters):
     cluster_members = ts_data[ts_data['cluster_ts'] == c].drop(columns='cluster_ts')
     for country in cluster_members.index:
         plt.plot(cluster_members.columns, cluster_members.loc[country], alpha=0.5)
-# Add country name at the end of the line
-plt.text(cluster_members.columns[-1], cluster_members.loc[country][-1], country, fontsize=8)
-plt.plot(cluster_members.columns, cluster_members.mean(), linewidth=3, label=f'Cluster {c} Mean')
+cluster_members.to_csv("cluster_members.csv", index=False)
 
 plt.title(f'Time-Series Clustering of Countries - {category}')
 plt.xlabel('Year')
 plt.ylabel('Net Trade (scaled)')
-plt.legend()
 plt.show()
 
 cluster_summary = ts_data.groupby('cluster_ts').apply(lambda x: list(x.index))
