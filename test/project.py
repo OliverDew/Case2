@@ -25,7 +25,7 @@ print(df.info())
 
 ##### Vera - Stratified Sampling of Countries as Classes
 df = df.groupby('country_or_area', group_keys=False).apply(
-    lambda x: x.sample(frac=0.6))
+    lambda x: x.sample(frac=0.4))
 df = df.reset_index(drop=True)
 df.to_csv("case2_sampled.csv", index=False)
 
