@@ -10,6 +10,7 @@ from scipy.cluster.hierarchy import dendrogram, linkage
 from sklearn.cluster import AgglomerativeClustering
 from tslearn.utils import to_time_series_dataset
 from tslearn.clustering import TimeSeriesKMeans
+from sklearn import preprocessing
 
 
 ##### Oliver - Read CSV
@@ -82,23 +83,6 @@ print("\nNet trade dataset created:")
 print(df_net.info())
 print(df_net.describe())
 
-# Oliver - Plot Albanian cereal production over the years
-alb_cereal = df_net[
-    (df_net["country_or_area"] == "Albania") &
-    (df_net["category"] == "10_cereals")
-]
-
-fig, ax = plt.subplots(figsize=(12, 8))
-plt.bar(alb_cereal["year"], alb_cereal["net_usd"], edgecolor="black", alpha=0.5, label="Albania")
-
-ax.ticklabel_format(style='plain', axis='y')
-ax.xaxis.set_major_locator(ticker.MaxNLocator(integer=True))
-
-plt.title("Albania – Net Trade in Cereals Over Time")
-plt.xlabel("Year")
-plt.ylabel("Net Trade (USD)")
-plt.grid(True)
-plt.show()
 
 # Vera: filter df_net for categories cereals and iron&steel:
 df_net_cereals = df_net.loc[df_net['category'] == '10_cereals', :]
@@ -107,52 +91,10 @@ print(df_net_cereals.head())
 df_net_IronAndSteel = df_net.loc[df_net['category'] == '72_iron_and_steel', :]
 print(df_net_IronAndSteel.head())
 
-# Vera: scatter plot net_usd per year:
-fig, ax = plt.subplots(figsize=(12, 8))
-df_net.plot.scatter(x="year", y="net_usd", ax=ax)
-plt.title("Net_USD per Year")
-
-# Vera: Bar Chart Top Players in Cereals
-fig, ax = plt.subplots(figsize=(10, 6))
-df_net_cereals['country_or_area'].value_counts().plot.bar(color='skyblue', edgecolor='black', ax=ax)
-plt.title('Trade in Cereals')
-plt.xlabel('country_or_area')
-plt.ylabel('net_usd')
-
-# Vera: Bar Chart Top Players in Iron&Steel
-fig, ax = plt.subplots(figsize=(10, 6))
-df_net_IronAndSteel['country_or_area'].value_counts().plot.bar(color='skyblue', edgecolor='black', ax=ax)
-plt.title('Trade in Iron and Steel')
-plt.xlabel('country_or_area')
-plt.ylabel('net_usd')
-plt.xlabel('country_or_area')
-plt.ylabel('net_usd')
-
-# Vera: Pie Chart for Category
-fig, ax = plt.subplots(figsize=(8, 8))
-df_net['category'].value_counts().plot.pie(autopct='%1.0f%%')
-plt.title('Proportion of Cereals and Iron and Steel')
-plt.ylabel('')
-
-# Vera: Boxplot
-fig, ax = plt.subplots(figsize=(12, 8))
-df_net.boxplot(column='net_usd', by='category', ax=ax)
-plt.xlabel('category')
-plt.ylabel('net_usd')
-
-# Vera: Scatter Plot by Category
-fig, ax = plt.subplots(figsize=(10, 6))
-sns.scatterplot(x='net_imports', y='net_export', hue='country_or_area', data=df_net)
-plt.title('Imports vs. Exports Colored by Country')
-plt.xlabel('net_imports')
-plt.ylabel('net_export')
-plt.legend(title='Country')
-
-# plt.show()
 
 #Thao: K-Means
 # =======
-#K-Means
+#K-Means for whole df_net
 
 # 1. Aggregate per country
 df_cluster = (
