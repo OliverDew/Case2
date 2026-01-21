@@ -88,10 +88,15 @@ pivot = aggregated.pivot_table(
 
 df_net = pivot.reset_index()
 
-# Compute net trade
+###### Oliver - Compute net trade and re_export and re_import ratio
 df_net["net_usd"] = (df_net["Export"] - df_net["Import"]) + (df_net["Re-Export"] - df_net["Re-Import"])
 df_net["net_imports"] = (df_net["Import"] + df_net["Re-Import"])
-df_net["net_export"] = (df_net["Export"] + df_net["Re-Export"])
+df_net["net_exports"] = (df_net["Export"] + df_net["Re-Export"])
+
+df_net["reexport_ratio"] = df_net["Re-Export"] / df_net["net_exports"]
+df_net["reimport_ratio"] = df_net["Re-Import"] / df_net["net_imports"]
+df_net.loc[df_net["net_exports"] == 0, "reexport_ratio"] = 0
+df_net.loc[df_net["net_imports"] == 0, "reimport_ratio"] = 0
 
 # Save
 save_csv(df_net, "net_trade_by_flow.csv")
@@ -116,14 +121,14 @@ print(df_net_IronAndSteel.head())
 # 1. Aggregate per country
 df_cluster = (
     df_net
-    .groupby('country_or_area')[['net_imports', 'net_export', 'net_usd']]
+    .groupby('country_or_area')[['net_imports', 'net_exports', 'net_usd']]
     .mean()
     .reset_index())
 
 # 2. Scale
 scaler = StandardScaler()
 X_scaled = scaler.fit_transform(
-    df_cluster[['net_imports', 'net_export', 'net_usd']])
+    df_cluster[['net_imports', 'net_exports', 'net_usd']])
 
 # 3. Elbow method
 inertia = []
@@ -162,7 +167,7 @@ print(Euclidean)
 # 7. Cluster summary (same as centroids but easier to explain)
 cluster_summary = (
     df_cluster
-    .groupby('cluster')[['net_imports', 'net_export', 'net_usd']]
+    .groupby('cluster')[['net_imports', 'net_exports', 'net_usd']]
     .mean())
 
 print(cluster_summary)
@@ -172,7 +177,7 @@ plt.figure(figsize=(10, 6))
 sns.scatterplot(
     data=df_cluster,
     x='net_imports',
-    y='net_export',
+    y='net_exports',
     hue='cluster',
     palette='Set2')
 plt.title('K-Means Clustering of Countries by Trade')
@@ -191,7 +196,7 @@ df_net = df_net.merge(
 # Cluster-level averages
 heatmap_data = (
     df_cluster
-    .groupby('cluster')[['net_imports', 'net_export', 'net_usd']]
+    .groupby('cluster')[['net_imports', 'net_exports', 'net_usd']]
     .mean())
 
 print(heatmap_data)
@@ -255,7 +260,7 @@ print(df_cluster.head())
 
 hier_summary = (
     df_cluster
-    .groupby('cluster_hier')[['net_imports', 'net_export', 'net_usd']]
+    .groupby('cluster_hier')[['net_imports', 'net_exports', 'net_usd']]
     .mean())
 
 print(hier_summary)
@@ -264,7 +269,7 @@ plt.figure(figsize=(10, 6))
 sns.scatterplot(
     data=df_cluster,
     x='net_imports',
-    y='net_export',
+    y='net_exports',
     hue='cluster_hier',
     palette='Set1')
 
@@ -358,7 +363,6 @@ for c in range(n_clusters):
     plt.plot(cluster_members.columns, cluster_members.mean(), linewidth=3, label=f'Cluster {c} Mean')
 
 plt.title(f'Time-Series Clustering of Countries - {'72_iron_and_steel'}')
-plt.xlabel('Year')
 plt.xlabel('Year')
 plt.ylabel('Net Trade (scaled)')
 plt.legend()
