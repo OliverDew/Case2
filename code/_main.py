@@ -98,6 +98,8 @@ df_net["reimport_ratio"] = df_net["Re-Import"] / df_net["net_imports"]
 df_net.loc[df_net["net_exports"] == 0, "reexport_ratio"] = 0
 df_net.loc[df_net["net_imports"] == 0, "reimport_ratio"] = 0
 
+df_net["export_import_ratio"] = df_net["net_exports"] / df_net["net_imports"]
+
 # Save
 save_csv(df_net, "net_trade_by_flow.csv")
 

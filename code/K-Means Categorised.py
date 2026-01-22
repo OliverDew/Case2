@@ -1,4 +1,4 @@
-from pandas import read_csv
+from pandas import read_csv, DataFrame
 import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
@@ -11,10 +11,20 @@ from sklearn.cluster import AgglomerativeClustering
 from tslearn.utils import to_time_series_dataset
 from tslearn.clustering import TimeSeriesKMeans
 from sklearn import preprocessing
+from pathlib import Path
+
+
+##### Oliver Save CSV function
+def save_csv(dataframe: DataFrame, name_of_csv: str):
+    dataframe.to_csv(CSV_DIR / name_of_csv, index=False)
 
 
 ##### Oliver - Read CSV
-df = read_csv("../csv/case2.csv", sep=";")
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+CSV_DIR = PROJECT_ROOT / "csv"
+CSV_DIR.mkdir(exist_ok=True)
+
+df = read_csv(CSV_DIR / "case2.csv", sep=";")
 
 print("Initial Dataset:")
 print(df.info())
@@ -32,11 +42,18 @@ print("\nDataset after dropping columns \"commodity\" and \"comm_code\" and remo
 print(df.info())
 
 
+##### Oliver - Check if stratified sample already exists
+sample_path = CSV_DIR / "case2_sampled.csv"
+
+if sample_path.exists():
+    df = read_csv(sample_path, sep=",")
+    df = df.reset_index(drop=True)
+else:
 ##### Vera - Stratified Sampling of Countries as Classes
-df = df.groupby('country_or_area', group_keys=False).apply(
-    lambda x: x.sample(frac=0.4))
-df = df.reset_index(drop=True)
-df.to_csv("case2_sampled.csv", index=False)
+    df = df.groupby('country_or_area', group_keys=False).apply(
+        lambda x: x.sample(frac=0.4))
+    df = df.reset_index(drop=True)
+    save_csv(df, "case2_sampled.csv")
 
 print("\nDataset after stratified sampling of countries as classes:")
 print(df.info())
@@ -49,7 +66,7 @@ print(df.info())
 
 ##### Vera - Create Dummy Variables for Category & Flow
 df_dummy = (pd.get_dummies(df, columns = ['category', 'flow'], prefix_sep='_', dummy_na=False, dtype='int'))
-df_dummy.to_csv("dummy.csv", index=False)
+save_csv(df_dummy, "dummy.csv")
 print("\nDataset after creating dummy variables for category & flow:")
 print(df_dummy.info())
 
@@ -71,13 +88,20 @@ pivot = aggregated.pivot_table(
 
 df_net = pivot.reset_index()
 
-# Compute net trade
+###### Oliver - Compute net trade and re_export and re_import ratio
 df_net["net_usd"] = (df_net["Export"] - df_net["Import"]) + (df_net["Re-Export"] - df_net["Re-Import"])
 df_net["net_imports"] = (df_net["Import"] + df_net["Re-Import"])
-df_net["net_export"] = (df_net["Export"] + df_net["Re-Export"])
+df_net["net_exports"] = (df_net["Export"] + df_net["Re-Export"])
+
+df_net["reexport_ratio"] = df_net["Re-Export"] / df_net["net_exports"]
+df_net["reimport_ratio"] = df_net["Re-Import"] / df_net["net_imports"]
+df_net.loc[df_net["net_exports"] == 0, "reexport_ratio"] = 0
+df_net.loc[df_net["net_imports"] == 0, "reimport_ratio"] = 0
+
+df_net["export_import_ratio"] = df_net["net_exports"] / df_net["net_imports"]
 
 # Save
-df_net.to_csv("case2_net_trade_by_flow.csv", index=False)
+save_csv(df_net, "net_trade_by_flow.csv")
 
 print("\nNet trade dataset created:")
 print(df_net.info())
@@ -99,14 +123,18 @@ print(df_net_IronAndSteel.head())
 # 1. Aggregate per country
 df_cluster = (
     df_net_cereals
-    .groupby('country_or_area')[['net_imports', 'net_export', 'net_usd']]
+    .groupby('country_or_area')[['Export', 'Import', 'Re-Export', 'Re-Import',
+                                 'net_imports', 'net_exports', 'net_usd',
+                                 'reexport_ratio', 'reimport_ratio' ]]
     .mean()
     .reset_index())
 
 # 2. Scale
 scaler = StandardScaler()
 X_scaled = scaler.fit_transform(
-    df_cluster[['net_imports', 'net_export', 'net_usd']])
+    df_cluster[['Export', 'Import', 'Re-Export', 'Re-Import',
+                                 'net_imports', 'net_exports', 'net_usd',
+                                 'reexport_ratio', 'reimport_ratio']])
 print("X_scaled type:", type(X_scaled))
 print("X_scaled shape:", X_scaled.shape)
 
@@ -133,7 +161,9 @@ df_cluster['cluster'] = kmeans.fit_predict(X_scaled)
 # 5. Cluster centroids in ORIGINAL units
 centroids = pd.DataFrame(
     scaler.inverse_transform(kmeans.cluster_centers_),
-    columns=['net_imports', 'net_export', 'net_usd'])
+    columns=['Export', 'Import', 'Re-Export', 'Re-Import',
+                                 'net_imports', 'net_exports', 'net_usd',
+                                 'reexport_ratio', 'reimport_ratio'])
 
 print("Cluster centroids (original scale):")
 print(centroids)
@@ -148,7 +178,9 @@ print(Euclidean)
 # 7. Cluster summary (same as centroids but easier to explain)
 cluster_summary = (
     df_cluster
-    .groupby('cluster')[['net_imports', 'net_export', 'net_usd']]
+    .groupby('cluster')[['Export', 'Import', 'Re-Export', 'Re-Import',
+                                 'net_imports', 'net_exports', 'net_usd',
+                                 'reexport_ratio', 'reimport_ratio']]
     .mean())
 
 print(cluster_summary)
@@ -158,7 +190,7 @@ plt.figure(figsize=(10, 6))
 sns.scatterplot(
     data=df_cluster,
     x='net_imports',
-    y='net_export',
+    y='net_exports',
     hue='cluster',
     palette='Set2')
 plt.title('K-Means Clustering of Countries by Trade for Cereals')
@@ -177,7 +209,9 @@ df_net = df_net.merge(
 # Cluster-level averages
 heatmap_data = (
     df_cluster
-    .groupby('cluster')[['net_imports', 'net_export', 'net_usd']]
+    .groupby('cluster')[['Export', 'Import', 'Re-Export', 'Re-Import',
+                                 'net_imports', 'net_exports', 'net_usd',
+                                 'reexport_ratio', 'reimport_ratio']]
     .mean())
 
 print(heatmap_data)
@@ -217,14 +251,18 @@ sns.clustermap(
 # 1. Aggregate per country
 df_cluster = (
     df_net_IronAndSteel
-    .groupby('country_or_area')[['net_imports', 'net_export', 'net_usd']]
+    .groupby('country_or_area')[['Export', 'Import', 'Re-Export', 'Re-Import',
+                                 'net_imports', 'net_exports', 'net_usd',
+                                 'reexport_ratio', 'reimport_ratio']]
     .mean()
     .reset_index())
 
 # 2. Scale
 scaler = StandardScaler()
 X_scaled = scaler.fit_transform(
-    df_cluster[['net_imports', 'net_export', 'net_usd']])
+    df_cluster[['Export', 'Import', 'Re-Export', 'Re-Import',
+                                 'net_imports', 'net_exports', 'net_usd',
+                                 'reexport_ratio', 'reimport_ratio']])
 print("X_scaled type:", type(X_scaled))
 print("X_scaled shape:", X_scaled.shape)
 
@@ -251,7 +289,9 @@ df_cluster['cluster'] = kmeans.fit_predict(X_scaled)
 # 5. Cluster centroids in ORIGINAL units
 centroids = pd.DataFrame(
     scaler.inverse_transform(kmeans.cluster_centers_),
-    columns=['net_imports', 'net_export', 'net_usd'])
+    columns=['Export', 'Import', 'Re-Export', 'Re-Import',
+                                 'net_imports', 'net_exports', 'net_usd',
+                                 'reexport_ratio', 'reimport_ratio'])
 
 print("Cluster centroids (original scale):")
 print(centroids)
@@ -266,7 +306,9 @@ print(Euclidean)
 # 7. Cluster summary (same as centroids but easier to explain)
 cluster_summary = (
     df_cluster
-    .groupby('cluster')[['net_imports', 'net_export', 'net_usd']]
+    .groupby('cluster')[['Export', 'Import', 'Re-Export', 'Re-Import',
+                                 'net_imports', 'net_exports', 'net_usd',
+                                 'reexport_ratio', 'reimport_ratio']]
     .mean())
 
 print(cluster_summary)
@@ -276,7 +318,7 @@ plt.figure(figsize=(10, 6))
 sns.scatterplot(
     data=df_cluster,
     x='net_imports',
-    y='net_export',
+    y='net_exports',
     hue='cluster',
     palette='Set2')
 plt.title('K-Means Clustering of Countries by Trade for Iron&Steel')
@@ -295,7 +337,9 @@ df_net = df_net.merge(
 # Cluster-level averages
 heatmap_data = (
     df_cluster
-    .groupby('cluster')[['net_imports', 'net_export', 'net_usd']]
+    .groupby('cluster')[['Export', 'Import', 'Re-Export', 'Re-Import',
+                                 'net_imports', 'net_exports', 'net_usd',
+                                 'reexport_ratio', 'reimport_ratio']]
     .mean())
 
 print(heatmap_data)
