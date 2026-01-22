@@ -115,22 +115,27 @@ print(df_net_cereals.head())
 df_net_IronAndSteel = df_net.loc[df_net['category'] == '72_iron_and_steel', :]
 print(df_net_IronAndSteel.head())
 
-
 #Thao: K-Means
-# =======
-#K-Means for whole df_net
+#Vera: differentiate between categories, adjusting features and k
+
+# K-Means for Cereals:
 
 # 1. Aggregate per country
 df_cluster = (
-    df_net
-    .groupby('country_or_area')[['net_imports', 'net_exports', 'net_usd']]
+    df_net_cereals
+    .groupby('country_or_area')[['Export','Import','Re-Export', 'Re-Import', 'net_usd',
+                                 'reexport_ratio', 'reimport_ratio']]
     .mean()
     .reset_index())
 
 # 2. Scale
 scaler = StandardScaler()
 X_scaled = scaler.fit_transform(
-    df_cluster[['net_imports', 'net_exports', 'net_usd']])
+    df_cluster[['Export','Import','Re-Export', 'Re-Import', 'net_usd',
+                                 'reexport_ratio', 'reimport_ratio']])
+print("X_scaled type:", type(X_scaled))
+print("X_scaled shape:", X_scaled.shape)
+
 
 # 3. Elbow method
 inertia = []
@@ -143,18 +148,19 @@ plt.figure(figsize=(8, 5))
 plt.plot(range(1, 11), inertia, marker='o')
 plt.xlabel('Number of clusters (k)')
 plt.ylabel('Inertia')
-plt.title('Elbow Method for Optimal k')
+plt.title('Optimal k for Cereals')
 plt.grid(True)
 plt.show()
 
-# 4. Final K-Means (k = 5)
-kmeans = KMeans(n_clusters=5, random_state=42, n_init=10)
+# 4. Final K-Means (k = 7)
+kmeans = KMeans(n_clusters=7, random_state=42, n_init=10)
 df_cluster['cluster'] = kmeans.fit_predict(X_scaled)
 
 # 5. Cluster centroids in ORIGINAL units
 centroids = pd.DataFrame(
     scaler.inverse_transform(kmeans.cluster_centers_),
-    columns=['net_imports', 'net_export', 'net_usd'])
+    columns=['Export','Import','Re-Export', 'Re-Import', 'net_usd',
+                                 'reexport_ratio', 'reimport_ratio'])
 
 print("Cluster centroids (original scale):")
 print(centroids)
@@ -169,7 +175,8 @@ print(Euclidean)
 # 7. Cluster summary (same as centroids but easier to explain)
 cluster_summary = (
     df_cluster
-    .groupby('cluster')[['net_imports', 'net_exports', 'net_usd']]
+    .groupby('cluster')[['Export','Import','Re-Export', 'Re-Import', 'net_usd',
+                                 'reexport_ratio', 'reimport_ratio']]
     .mean())
 
 print(cluster_summary)
@@ -178,13 +185,13 @@ print(cluster_summary)
 plt.figure(figsize=(10, 6))
 sns.scatterplot(
     data=df_cluster,
-    x='net_imports',
-    y='net_exports',
+    x='Import',
+    y='Export',
     hue='cluster',
     palette='Set2')
-plt.title('K-Means Clustering of Countries by Trade')
-plt.xlabel('Average Net Imports')
-plt.ylabel('Average Net Exports')
+plt.title('K-Means Clustering of Countries by Trade for Cereals')
+plt.xlabel('Imports')
+plt.ylabel('Exports')
 plt.grid(True)
 plt.show()
 
@@ -198,11 +205,11 @@ df_net = df_net.merge(
 # Cluster-level averages
 heatmap_data = (
     df_cluster
-    .groupby('cluster')[['net_imports', 'net_exports', 'net_usd']]
+    .groupby('cluster')[['Export','Import','Re-Export', 'Re-Import', 'net_usd',
+                                 'reexport_ratio', 'reimport_ratio']]
     .mean())
 
 print(heatmap_data)
-
 
 scaler_hm = StandardScaler()
 heatmap_scaled = pd.DataFrame(
@@ -220,7 +227,7 @@ sns.heatmap(
     center=0,
     linewidths=0.5)
 
-plt.title('Cluster Heatmap: Trade Indicators (K-Means)')
+plt.title('Heatmap: K-Means, Cereals)')
 plt.xlabel('Trade Indicators')
 plt.ylabel('Cluster')
 plt.tight_layout()
@@ -232,6 +239,131 @@ sns.clustermap(
     center=0,
     annot=True,
     figsize=(8, 6))
+
+
+#K-Means for Iron&Steel
+
+# 1. Aggregate per country
+df_cluster = (
+    df_net_IronAndSteel
+    .groupby('country_or_area')[['Export','Import','Re-Export', 'Re-Import', 'net_usd',
+                                 'reexport_ratio', 'reimport_ratio']]
+    .mean()
+    .reset_index())
+
+# 2. Scale
+scaler = StandardScaler()
+X_scaled = scaler.fit_transform(
+    df_cluster[['Export','Import','Re-Export', 'Re-Import', 'net_usd',
+                                 'reexport_ratio', 'reimport_ratio']])
+print("X_scaled type:", type(X_scaled))
+print("X_scaled shape:", X_scaled.shape)
+
+
+# 3. Elbow method
+inertia = []
+for k in range(1, 11):
+    kmeans = KMeans(n_clusters=k, random_state=42, n_init=10)
+    kmeans.fit(X_scaled)
+    inertia.append(kmeans.inertia_)
+
+plt.figure(figsize=(8, 5))
+plt.plot(range(1, 11), inertia, marker='o')
+plt.xlabel('Number of clusters (k)')
+plt.ylabel('Inertia')
+plt.title('Optimal k for Iron&Steel')
+plt.grid(True)
+plt.show()
+
+# 4. Final K-Means (k = 7)
+kmeans = KMeans(n_clusters=7, random_state=42, n_init=10)
+df_cluster['cluster'] = kmeans.fit_predict(X_scaled)
+
+# 5. Cluster centroids in ORIGINAL units
+centroids = pd.DataFrame(
+    scaler.inverse_transform(kmeans.cluster_centers_),
+    columns=['Export','Import','Re-Export', 'Re-Import', 'net_usd',
+                                 'reexport_ratio', 'reimport_ratio'])
+
+print("Cluster centroids (original scale):")
+print(centroids)
+
+# 6. Euclidean distances between cluster centers (scaled space)
+Euclidean = pd.DataFrame(
+    pairwise_distances(kmeans.cluster_centers_, metric='euclidean'))
+
+print("Euclidean distances between clusters:")
+print(Euclidean)
+
+# 7. Cluster summary (same as centroids but easier to explain)
+cluster_summary = (
+    df_cluster
+    .groupby('cluster')[['Export','Import','Re-Export', 'Re-Import', 'net_usd',
+                                 'reexport_ratio', 'reimport_ratio']]
+    .mean())
+
+print(cluster_summary)
+
+# 8. 2D Visualization
+plt.figure(figsize=(10, 6))
+sns.scatterplot(
+    data=df_cluster,
+    x='Import',
+    y='Export',
+    hue='cluster',
+    palette='Set2')
+plt.title('K-Means Clustering of Countries by Trade for Iron&Steel')
+plt.xlabel('Imports')
+plt.ylabel('Exports')
+plt.grid(True)
+plt.show()
+
+# 9. Merge clusters back to df_net
+df_net = df_net.merge(
+    df_cluster[['country_or_area', 'cluster']],
+    on='country_or_area',
+    how='left')
+
+#K-Means HeatMap
+# Cluster-level averages
+heatmap_data = (
+    df_cluster
+    .groupby('cluster')[['Export','Import','Re-Export', 'Re-Import', 'net_usd',
+                                 'reexport_ratio', 'reimport_ratio']]
+    .mean())
+
+print(heatmap_data)
+
+scaler_hm = StandardScaler()
+heatmap_scaled = pd.DataFrame(
+    scaler_hm.fit_transform(heatmap_data),
+    index=heatmap_data.index,
+    columns=heatmap_data.columns)
+
+print(heatmap_scaled)
+
+plt.figure(figsize=(8, 5))
+sns.heatmap(
+    heatmap_scaled,
+    annot=True,
+    cmap='coolwarm',
+    center=0,
+    linewidths=0.5)
+
+plt.title('Heatmap: K-Means, Cereals)')
+plt.xlabel('Trade Indicators')
+plt.ylabel('Cluster')
+plt.tight_layout()
+plt.show()
+
+sns.clustermap(
+    heatmap_scaled,
+    cmap='coolwarm',
+    center=0,
+    annot=True,
+    figsize=(8, 6))
+
+
 
 #Hierarchical Clustering: Agglomerative
 
@@ -256,33 +388,34 @@ agg = AgglomerativeClustering(
     n_clusters=5,
     linkage='ward')
 
-df_cluster['cluster_hier'] = agg.fit_predict(X_scaled)
+df_cluster['cluster_agglomerative'] = agg.fit_predict(X_scaled)
 
 print(df_cluster.head())
 
-hier_summary = (
+agglomerative_summary = (
     df_cluster
-    .groupby('cluster_hier')[['net_imports', 'net_exports', 'net_usd']]
+    .groupby('cluster_agglomerative')[['Export','Import','Re-Export', 'Re-Import', 'net_usd',
+                                 'reexport_ratio', 'reimport_ratio']]
     .mean())
 
-print(hier_summary)
+print(agglomerative_summary)
 
 plt.figure(figsize=(10, 6))
 sns.scatterplot(
     data=df_cluster,
-    x='net_imports',
-    y='net_exports',
-    hue='cluster_hier',
+    x='Import',
+    y='Export',
+    hue='cluster_agglomerative',
     palette='Set1')
 
 plt.title('Hierarchical Clustering of Countries by Trade')
-plt.xlabel('Average Net Imports')
-plt.ylabel('Average Net Exports')
+plt.xlabel('Import')
+plt.ylabel('Export')
 plt.grid(True)
 plt.show()
 
 df_net = df_net.merge(
-    df_cluster[['country_or_area', 'cluster_hier']],
+    df_cluster[['country_or_area', 'cluster_agglomerative']],
     on='country_or_area',
     how='left')
 
@@ -300,7 +433,7 @@ ts_scaled_3d = to_time_series_dataset(ts_scaled)
 print(ts_scaled_3d.shape)  # (n_countries, n_years, 1)
 
 # Choose number of clusters
-n_clusters = 5
+n_clusters = 7
 
 km = TimeSeriesKMeans(n_clusters=n_clusters, metric="dtw", max_iter=50, random_state=42)
 labels = km.fit_predict(ts_scaled_3d)
@@ -349,7 +482,7 @@ ts_scaled = scaler.fit_transform(ts_data)
 ts_scaled_3d = to_time_series_dataset(ts_scaled)
 
 # Time-Series K-Means clustering
-n_clusters = 5
+n_clusters = 7
 km = TimeSeriesKMeans(n_clusters=n_clusters, metric="dtw", max_iter=50, random_state=42)
 labels = km.fit_predict(ts_scaled_3d)
 

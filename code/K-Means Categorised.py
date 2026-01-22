@@ -98,6 +98,7 @@ df_net["reimport_ratio"] = df_net["Re-Import"] / df_net["net_imports"]
 df_net.loc[df_net["net_exports"] == 0, "reexport_ratio"] = 0
 df_net.loc[df_net["net_imports"] == 0, "reimport_ratio"] = 0
 
+#Vera: compute export/ import ratio
 df_net["export_import_ratio"] = df_net["net_exports"] / df_net["net_imports"]
 
 # Save
@@ -123,17 +124,15 @@ print(df_net_IronAndSteel.head())
 # 1. Aggregate per country
 df_cluster = (
     df_net_cereals
-    .groupby('country_or_area')[['Export', 'Import', 'Re-Export', 'Re-Import',
-                                 'net_imports', 'net_exports', 'net_usd',
-                                 'reexport_ratio', 'reimport_ratio' ]]
+    .groupby('country_or_area')[['Export','Import','Re-Export', 'Re-Import', 'net_usd',
+                                 'reexport_ratio', 'reimport_ratio']]
     .mean()
     .reset_index())
 
 # 2. Scale
 scaler = StandardScaler()
 X_scaled = scaler.fit_transform(
-    df_cluster[['Export', 'Import', 'Re-Export', 'Re-Import',
-                                 'net_imports', 'net_exports', 'net_usd',
+    df_cluster[['Export','Import','Re-Export', 'Re-Import', 'net_usd',
                                  'reexport_ratio', 'reimport_ratio']])
 print("X_scaled type:", type(X_scaled))
 print("X_scaled shape:", X_scaled.shape)
@@ -154,15 +153,14 @@ plt.title('Optimal k for Cereals')
 plt.grid(True)
 plt.show()
 
-# 4. Final K-Means (k = 5)
-kmeans = KMeans(n_clusters=5, random_state=42, n_init=10)
+# 4. Final K-Means (k = 7)
+kmeans = KMeans(n_clusters=7, random_state=42, n_init=10)
 df_cluster['cluster'] = kmeans.fit_predict(X_scaled)
 
 # 5. Cluster centroids in ORIGINAL units
 centroids = pd.DataFrame(
     scaler.inverse_transform(kmeans.cluster_centers_),
-    columns=['Export', 'Import', 'Re-Export', 'Re-Import',
-                                 'net_imports', 'net_exports', 'net_usd',
+    columns=['Export','Import','Re-Export', 'Re-Import', 'net_usd',
                                  'reexport_ratio', 'reimport_ratio'])
 
 print("Cluster centroids (original scale):")
@@ -178,8 +176,7 @@ print(Euclidean)
 # 7. Cluster summary (same as centroids but easier to explain)
 cluster_summary = (
     df_cluster
-    .groupby('cluster')[['Export', 'Import', 'Re-Export', 'Re-Import',
-                                 'net_imports', 'net_exports', 'net_usd',
+    .groupby('cluster')[['Export','Import','Re-Export', 'Re-Import', 'net_usd',
                                  'reexport_ratio', 'reimport_ratio']]
     .mean())
 
@@ -189,13 +186,13 @@ print(cluster_summary)
 plt.figure(figsize=(10, 6))
 sns.scatterplot(
     data=df_cluster,
-    x='net_imports',
-    y='net_exports',
+    x='Import',
+    y='Export',
     hue='cluster',
     palette='Set2')
 plt.title('K-Means Clustering of Countries by Trade for Cereals')
-plt.xlabel('Average Net Imports')
-plt.ylabel('Average Net Exports')
+plt.xlabel('Imports')
+plt.ylabel('Exports')
 plt.grid(True)
 plt.show()
 
@@ -209,8 +206,7 @@ df_net = df_net.merge(
 # Cluster-level averages
 heatmap_data = (
     df_cluster
-    .groupby('cluster')[['Export', 'Import', 'Re-Export', 'Re-Import',
-                                 'net_imports', 'net_exports', 'net_usd',
+    .groupby('cluster')[['Export','Import','Re-Export', 'Re-Import', 'net_usd',
                                  'reexport_ratio', 'reimport_ratio']]
     .mean())
 
@@ -251,8 +247,7 @@ sns.clustermap(
 # 1. Aggregate per country
 df_cluster = (
     df_net_IronAndSteel
-    .groupby('country_or_area')[['Export', 'Import', 'Re-Export', 'Re-Import',
-                                 'net_imports', 'net_exports', 'net_usd',
+    .groupby('country_or_area')[['Export','Import','Re-Export', 'Re-Import', 'net_usd',
                                  'reexport_ratio', 'reimport_ratio']]
     .mean()
     .reset_index())
@@ -260,8 +255,7 @@ df_cluster = (
 # 2. Scale
 scaler = StandardScaler()
 X_scaled = scaler.fit_transform(
-    df_cluster[['Export', 'Import', 'Re-Export', 'Re-Import',
-                                 'net_imports', 'net_exports', 'net_usd',
+    df_cluster[['Export','Import','Re-Export', 'Re-Import', 'net_usd',
                                  'reexport_ratio', 'reimport_ratio']])
 print("X_scaled type:", type(X_scaled))
 print("X_scaled shape:", X_scaled.shape)
@@ -282,15 +276,14 @@ plt.title('Optimal k for Iron&Steel')
 plt.grid(True)
 plt.show()
 
-# 4. Final K-Means (k = 3)
-kmeans = KMeans(n_clusters=3, random_state=42, n_init=10)
+# 4. Final K-Means (k = 7)
+kmeans = KMeans(n_clusters=7, random_state=42, n_init=10)
 df_cluster['cluster'] = kmeans.fit_predict(X_scaled)
 
 # 5. Cluster centroids in ORIGINAL units
 centroids = pd.DataFrame(
     scaler.inverse_transform(kmeans.cluster_centers_),
-    columns=['Export', 'Import', 'Re-Export', 'Re-Import',
-                                 'net_imports', 'net_exports', 'net_usd',
+    columns=['Export','Import','Re-Export', 'Re-Import', 'net_usd',
                                  'reexport_ratio', 'reimport_ratio'])
 
 print("Cluster centroids (original scale):")
@@ -306,8 +299,7 @@ print(Euclidean)
 # 7. Cluster summary (same as centroids but easier to explain)
 cluster_summary = (
     df_cluster
-    .groupby('cluster')[['Export', 'Import', 'Re-Export', 'Re-Import',
-                                 'net_imports', 'net_exports', 'net_usd',
+    .groupby('cluster')[['Export','Import','Re-Export', 'Re-Import', 'net_usd',
                                  'reexport_ratio', 'reimport_ratio']]
     .mean())
 
@@ -317,13 +309,13 @@ print(cluster_summary)
 plt.figure(figsize=(10, 6))
 sns.scatterplot(
     data=df_cluster,
-    x='net_imports',
-    y='net_exports',
+    x='Import',
+    y='Export',
     hue='cluster',
     palette='Set2')
 plt.title('K-Means Clustering of Countries by Trade for Iron&Steel')
-plt.xlabel('Average Net Imports')
-plt.ylabel('Average Net Exports')
+plt.xlabel('Imports')
+plt.ylabel('Exports')
 plt.grid(True)
 plt.show()
 
@@ -337,8 +329,7 @@ df_net = df_net.merge(
 # Cluster-level averages
 heatmap_data = (
     df_cluster
-    .groupby('cluster')[['Export', 'Import', 'Re-Export', 'Re-Import',
-                                 'net_imports', 'net_exports', 'net_usd',
+    .groupby('cluster')[['Export','Import','Re-Export', 'Re-Import', 'net_usd',
                                  'reexport_ratio', 'reimport_ratio']]
     .mean())
 
