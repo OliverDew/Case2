@@ -240,6 +240,56 @@ sns.clustermap(
     annot=True,
     figsize=(8, 6))
 
+#Time-Series K-Means for cereals:
+
+# Pivot to get time series: rows = countries, columns = years
+ts_data = df_net_cereals.pivot(index='country_or_area', columns='year', values='net_usd').fillna(0)
+
+print(ts_data.head())
+
+scaler = StandardScaler()
+ts_scaled = scaler.fit_transform(ts_data)
+
+ts_scaled_3d = to_time_series_dataset(ts_scaled)
+print(ts_scaled_3d.shape)  # (n_countries, n_years, 1)
+
+# Choose number of clusters
+n_clusters = 7
+
+km = TimeSeriesKMeans(n_clusters=n_clusters, metric="dtw", max_iter=50, random_state=42)
+labels = km.fit_predict(ts_scaled_3d)
+
+# Add cluster labels back to dataframe
+ts_data['cluster_ts'] = labels
+print(ts_data[['cluster_ts']])
+
+plt.figure(figsize=(12,6))
+
+for c in range(n_clusters):
+    cluster_members = ts_data[ts_data['cluster_ts'] == c].drop(columns='cluster_ts')
+    for country in cluster_members.index:
+        plt.plot(cluster_members.columns, cluster_members.loc[country], alpha=0.5)
+    plt.plot(cluster_members.columns, cluster_members.mean(), linewidth=3, label=f'Cluster {c} Mean')
+
+plt.title(f'Time-Series Clustering of Countries - {'10_cereals'}')
+plt.xlabel('Year')
+plt.ylabel('Net Trade (scaled)')
+plt.legend()
+plt.show()
+
+for c in range(n_clusters):
+    cluster_countries = ts_data[ts_data['cluster_ts'] == c].index.tolist()
+    print(f"\nCluster {c}:")
+    print(cluster_countries)
+
+df_net = df_net.merge(
+    ts_data['cluster_ts'].reset_index(),
+    left_on='country_or_area',
+    right_on='country_or_area',
+    how='left')
+
+print(df_net[['country_or_area', 'cluster_ts']].drop_duplicates())
+
 
 #K-Means for Iron&Steel
 
@@ -363,112 +413,6 @@ sns.clustermap(
     annot=True,
     figsize=(8, 6))
 
-
-
-#Hierarchical Clustering: Agglomerative
-
-# Linkage matrix
-Z = linkage(X_scaled, method='ward')
-
-plt.figure(figsize=(12, 6))
-dendrogram(
-    Z,
-    labels=df_cluster['country_or_area'].values,
-    leaf_rotation=90,
-    leaf_font_size=8)
-
-plt.title('Hierarchical Clustering Dendrogram (Ward)')
-plt.xlabel('Country')
-plt.ylabel('Distance')
-plt.tight_layout()
-plt.show()
-
-
-agg = AgglomerativeClustering(
-    n_clusters=5,
-    linkage='ward')
-
-df_cluster['cluster_agglomerative'] = agg.fit_predict(X_scaled)
-
-print(df_cluster.head())
-
-agglomerative_summary = (
-    df_cluster
-    .groupby('cluster_agglomerative')[['Export','Import','Re-Export', 'Re-Import', 'net_usd',
-                                 'reexport_ratio', 'reimport_ratio']]
-    .mean())
-
-print(agglomerative_summary)
-
-plt.figure(figsize=(10, 6))
-sns.scatterplot(
-    data=df_cluster,
-    x='Import',
-    y='Export',
-    hue='cluster_agglomerative',
-    palette='Set1')
-
-plt.title('Hierarchical Clustering of Countries by Trade')
-plt.xlabel('Import')
-plt.ylabel('Export')
-plt.grid(True)
-plt.show()
-
-df_net = df_net.merge(
-    df_cluster[['country_or_area', 'cluster_agglomerative']],
-    on='country_or_area',
-    how='left')
-
-#Time-Series K-Means for cereals
-
-# Pivot to get time series: rows = countries, columns = years
-ts_data = df_net_cereals.pivot(index='country_or_area', columns='year', values='net_usd').fillna(0)
-
-print(ts_data.head())
-
-scaler = StandardScaler()
-ts_scaled = scaler.fit_transform(ts_data)
-
-ts_scaled_3d = to_time_series_dataset(ts_scaled)
-print(ts_scaled_3d.shape)  # (n_countries, n_years, 1)
-
-# Choose number of clusters
-n_clusters = 7
-
-km = TimeSeriesKMeans(n_clusters=n_clusters, metric="dtw", max_iter=50, random_state=42)
-labels = km.fit_predict(ts_scaled_3d)
-
-# Add cluster labels back to dataframe
-ts_data['cluster_ts'] = labels
-print(ts_data[['cluster_ts']])
-
-plt.figure(figsize=(12,6))
-
-for c in range(n_clusters):
-    cluster_members = ts_data[ts_data['cluster_ts'] == c].drop(columns='cluster_ts')
-    for country in cluster_members.index:
-        plt.plot(cluster_members.columns, cluster_members.loc[country], alpha=0.5)
-    plt.plot(cluster_members.columns, cluster_members.mean(), linewidth=3, label=f'Cluster {c} Mean')
-
-plt.title(f'Time-Series Clustering of Countries - {'10_cereals'}')
-plt.xlabel('Year')
-plt.ylabel('Net Trade (scaled)')
-plt.legend()
-plt.show()
-
-for c in range(n_clusters):
-    cluster_countries = ts_data[ts_data['cluster_ts'] == c].index.tolist()
-    print(f"\nCluster {c}:")
-    print(cluster_countries)
-
-df_net = df_net.merge(
-    ts_data['cluster_ts'].reset_index(),
-    left_on='country_or_area',
-    right_on='country_or_area',
-    how='left')
-
-print(df_net[['country_or_area', 'cluster_ts']].drop_duplicates())
-
 # Time Series K Means for Iron&Steel
 
 # Pivot to time-series format
@@ -532,3 +476,58 @@ plt.show()
 
 cluster_summary = ts_data.groupby('cluster_ts').apply(lambda x: list(x.index))
 print(cluster_summary)
+
+
+#Hierarchical Clustering: Agglomerative
+
+# Linkage matrix
+Z = linkage(X_scaled, method='ward')
+
+plt.figure(figsize=(12, 6))
+dendrogram(
+    Z,
+    labels=df_cluster['country_or_area'].values,
+    leaf_rotation=90,
+    leaf_font_size=8)
+
+plt.title('Hierarchical Clustering Dendrogram (Ward)')
+plt.xlabel('Country')
+plt.ylabel('Distance')
+plt.tight_layout()
+plt.show()
+
+
+agg = AgglomerativeClustering(
+    n_clusters=5,
+    linkage='ward')
+
+df_cluster['cluster_agglomerative'] = agg.fit_predict(X_scaled)
+
+print(df_cluster.head())
+
+agglomerative_summary = (
+    df_cluster
+    .groupby('cluster_agglomerative')[['Export','Import','Re-Export', 'Re-Import', 'net_usd',
+                                 'reexport_ratio', 'reimport_ratio']]
+    .mean())
+
+print(agglomerative_summary)
+
+plt.figure(figsize=(10, 6))
+sns.scatterplot(
+    data=df_cluster,
+    x='Import',
+    y='Export',
+    hue='cluster_agglomerative',
+    palette='Set1')
+
+plt.title('Hierarchical Clustering of Countries by Trade')
+plt.xlabel('Import')
+plt.ylabel('Export')
+plt.grid(True)
+plt.show()
+
+df_net = df_net.merge(
+    df_cluster[['country_or_area', 'cluster_agglomerative']],
+    on='country_or_area',
+    how='left')
