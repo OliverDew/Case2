@@ -121,7 +121,7 @@ print(df_net_IronAndSteel.head())
 # K-Means for Cereals:
 
 # 1. Aggregate per country
-df_cluster = (
+df_cluster_cereals = (
     df_net_cereals
     .groupby('country_or_area')[['Export','Import','Re-Export', 'Re-Import', 'net_usd',
                                  'reexport_ratio', 'reimport_ratio']]
@@ -130,18 +130,18 @@ df_cluster = (
 
 # 2. Scale
 scaler = StandardScaler()
-X_scaled = scaler.fit_transform(
-    df_cluster[['Export','Import','Re-Export', 'Re-Import', 'net_usd',
+cereals_scaled = scaler.fit_transform(
+    df_cluster_cereals[['Export','Import','Re-Export', 'Re-Import', 'net_usd',
                                  'reexport_ratio', 'reimport_ratio']])
-print("X_scaled type:", type(X_scaled))
-print("X_scaled shape:", X_scaled.shape)
+print("cereals_scaled type:", type(cereals_scaled))
+print("cereals_scaled shape:", cereals_scaled.shape)
 
 
 # 3. Elbow method
 inertia = []
 for k in range(1, 11):
     kmeans = KMeans(n_clusters=k, random_state=42, n_init=10)
-    kmeans.fit(X_scaled)
+    kmeans.fit(cereals_scaled)
     inertia.append(kmeans.inertia_)
 
 plt.figure(figsize=(8, 5))
@@ -154,7 +154,7 @@ plt.show()
 
 # 4. Final K-Means (k = 7)
 kmeans = KMeans(n_clusters=7, random_state=42, n_init=10)
-df_cluster['cluster'] = kmeans.fit_predict(X_scaled)
+df_cluster_cereals['cluster'] = kmeans.fit_predict(cereals_scaled)
 
 # 5. Cluster centroids in ORIGINAL units
 centroids = pd.DataFrame(
@@ -174,7 +174,7 @@ print(Euclidean)
 
 # 7. Cluster summary (same as centroids but easier to explain)
 cluster_summary = (
-    df_cluster
+    df_cluster_cereals
     .groupby('cluster')[['Export','Import','Re-Export', 'Re-Import', 'net_usd',
                                  'reexport_ratio', 'reimport_ratio']]
     .mean())
@@ -184,7 +184,7 @@ print(cluster_summary)
 # 8. 2D Visualization
 plt.figure(figsize=(10, 6))
 sns.scatterplot(
-    data=df_cluster,
+    data=df_cluster_cereals,
     x='Import',
     y='Export',
     hue='cluster',
@@ -197,14 +197,14 @@ plt.show()
 
 # 9. Merge clusters back to df_net
 df_net = df_net.merge(
-    df_cluster[['country_or_area', 'cluster']],
+    df_cluster_cereals[['country_or_area', 'cluster']],
     on='country_or_area',
     how='left')
 
 #K-Means HeatMap
 # Cluster-level averages
 heatmap_data = (
-    df_cluster
+    df_cluster_cereals
     .groupby('cluster')[['Export','Import','Re-Export', 'Re-Import', 'net_usd',
                                  'reexport_ratio', 'reimport_ratio']]
     .mean())
@@ -303,18 +303,18 @@ df_cluster = (
 
 # 2. Scale
 scaler = StandardScaler()
-X_scaled = scaler.fit_transform(
+ironsteel_scaled = scaler.fit_transform(
     df_cluster[['Export','Import','Re-Export', 'Re-Import', 'net_usd',
                                  'reexport_ratio', 'reimport_ratio']])
-print("X_scaled type:", type(X_scaled))
-print("X_scaled shape:", X_scaled.shape)
+print("Iron&Steel_scaled type:", type(ironsteel_scaled))
+print("Iron&Steel_scaled shape:", ironsteel_scaled.shape)
 
 
 # 3. Elbow method
 inertia = []
 for k in range(1, 11):
     kmeans = KMeans(n_clusters=k, random_state=42, n_init=10)
-    kmeans.fit(X_scaled)
+    kmeans.fit(ironsteel_scaled)
     inertia.append(kmeans.inertia_)
 
 plt.figure(figsize=(8, 5))
@@ -327,7 +327,7 @@ plt.show()
 
 # 4. Final K-Means (k = 7)
 kmeans = KMeans(n_clusters=7, random_state=42, n_init=10)
-df_cluster['cluster'] = kmeans.fit_predict(X_scaled)
+df_cluster['cluster'] = kmeans.fit_predict(ironsteel_scaled)
 
 # 5. Cluster centroids in ORIGINAL units
 centroids = pd.DataFrame(
@@ -467,7 +467,6 @@ for c in range(n_clusters):
     cluster_members = ts_data[ts_data['cluster_ts'] == c].drop(columns='cluster_ts')
     for country in cluster_members.index:
         plt.plot(cluster_members.columns, cluster_members.loc[country], alpha=0.5)
-save_csv(cluster_members, "cluster_members.csv")
 
 plt.title(f'Time-Series Clustering of Countries - {'72_iron_and_steel'}')
 plt.xlabel('Year')
@@ -480,8 +479,10 @@ print(cluster_summary)
 
 #Hierarchical Clustering: Agglomerative
 
+# Agglomerative Clustering for Iron&Steel:
+
 # Linkage matrix
-Z = linkage(X_scaled, method='ward')
+Z = linkage(ironsteel_scaled, method='ward')
 
 plt.figure(figsize=(12, 6))
 dendrogram(
@@ -490,7 +491,7 @@ dendrogram(
     leaf_rotation=90,
     leaf_font_size=8)
 
-plt.title('Hierarchical Clustering Dendrogram (Ward)')
+plt.title('Hierarchical Clustering Dendrogram (Ward) for Iron&Steel')
 plt.xlabel('Country')
 plt.ylabel('Distance')
 plt.tight_layout()
@@ -498,16 +499,16 @@ plt.show()
 
 
 agg = AgglomerativeClustering(
-    n_clusters=5,
+    n_clusters=3,
     linkage='ward')
 
-df_cluster['cluster_agglomerative'] = agg.fit_predict(X_scaled)
+df_cluster['cluster_agglomerative_ironsteel'] = agg.fit_predict(ironsteel_scaled)
 
 print(df_cluster.head())
 
 agglomerative_summary = (
     df_cluster
-    .groupby('cluster_agglomerative')[['Export','Import','Re-Export', 'Re-Import', 'net_usd',
+    .groupby('cluster_agglomerative_ironsteel')[['Export','Import','Re-Export', 'Re-Import', 'net_usd',
                                  'reexport_ratio', 'reimport_ratio']]
     .mean())
 
@@ -518,16 +519,70 @@ sns.scatterplot(
     data=df_cluster,
     x='Import',
     y='Export',
-    hue='cluster_agglomerative',
+    hue='cluster_agglomerative_ironsteel',
     palette='Set1')
 
-plt.title('Hierarchical Clustering of Countries by Trade')
+plt.title('Hierarchical Clustering for Iron&Steel')
 plt.xlabel('Import')
 plt.ylabel('Export')
 plt.grid(True)
 plt.show()
 
 df_net = df_net.merge(
-    df_cluster[['country_or_area', 'cluster_agglomerative']],
+    df_cluster[['country_or_area', 'cluster_agglomerative_ironsteel']],
+    on='country_or_area',
+    how='left')
+
+# Agglomerative Clustering for Cereals:
+
+# Linkage matrix
+X = linkage(cereals_scaled, method='ward')
+
+plt.figure(figsize=(12, 6))
+dendrogram(
+    X,
+    labels=df_cluster_cereals['country_or_area'].values,
+    leaf_rotation=90,
+    leaf_font_size=8)
+
+plt.title('Hierarchical Clustering Dendrogram (Ward) for Cereals')
+plt.xlabel('Country')
+plt.ylabel('Distance')
+plt.tight_layout()
+plt.show()
+
+
+agg = AgglomerativeClustering(
+    n_clusters=3,
+    linkage='ward')
+
+df_cluster['cluster_agglomerative_cereals'] = agg.fit_predict(ironsteel_scaled)
+
+print(df_cluster.head())
+
+agglomerative_summary = (
+    df_cluster
+    .groupby('cluster_agglomerative_cereals')[['Export','Import','Re-Export', 'Re-Import', 'net_usd',
+                                 'reexport_ratio', 'reimport_ratio']]
+    .mean())
+
+print(agglomerative_summary)
+
+plt.figure(figsize=(10, 6))
+sns.scatterplot(
+    data=df_cluster,
+    x='Import',
+    y='Export',
+    hue='cluster_agglomerative_cereals',
+    palette='Set1')
+
+plt.title('Hierarchical Clustering for Cereals')
+plt.xlabel('Import')
+plt.ylabel('Export')
+plt.grid(True)
+plt.show()
+
+df_net = df_net.merge(
+    df_cluster[['country_or_area', 'cluster_agglomerative_cereals']],
     on='country_or_area',
     how='left')
