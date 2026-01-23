@@ -556,21 +556,23 @@ agg = AgglomerativeClustering(
     n_clusters=3,
     linkage='ward')
 
-df_cluster['cluster_agglomerative_cereals'] = agg.fit_predict(ironsteel_scaled)
+df_cluster_cereals['cluster_agglomerative_cereals'] = agg.fit_predict(cereals_scaled)
 
-print(df_cluster.head())
+print(df_cluster_cereals)
+
+print(agg)
 
 agglomerative_summary = (
-    df_cluster
+    df_cluster_cereals
     .groupby('cluster_agglomerative_cereals')[['Export','Import','Re-Export', 'Re-Import', 'net_usd',
                                  'reexport_ratio', 'reimport_ratio']]
-    .mean())
+    .mean()).apply(list)
 
 print(agglomerative_summary)
 
 plt.figure(figsize=(10, 6))
 sns.scatterplot(
-    data=df_cluster,
+    data=df_cluster_cereals,
     x='Import',
     y='Export',
     hue='cluster_agglomerative_cereals',
@@ -583,6 +585,6 @@ plt.grid(True)
 plt.show()
 
 df_net = df_net.merge(
-    df_cluster[['country_or_area', 'cluster_agglomerative_cereals']],
+    df_cluster_cereals[['country_or_area', 'cluster_agglomerative_cereals']],
     on='country_or_area',
     how='left')
