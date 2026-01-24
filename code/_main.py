@@ -560,13 +560,11 @@ df_cluster_cereals['cluster_agglomerative_cereals'] = agg.fit_predict(cereals_sc
 
 print(df_cluster_cereals)
 
-print(agg)
-
+# list of clusters:
 clusters_cereals = (
     df_cluster_cereals
     .groupby('cluster_agglomerative_cereals')['country_or_area']
-    .apply(list)
-)
+    .apply(list))
 
 for cluster, countries in clusters_cereals.items():
     print(f"Cluster {cluster}:")
