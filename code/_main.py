@@ -562,6 +562,21 @@ print(df_cluster_cereals)
 
 print(agg)
 
+clusters_cereals = (
+    df_cluster_cereals
+    .groupby('cluster_agglomerative_cereals')['country_or_area']
+    .apply(list)
+)
+
+for cluster, countries in clusters_cereals.items():
+    print(f"Cluster {cluster}:")
+    for c in countries:
+        print(f"  - {c}")
+    print()
+
+    clusters_cereals.reset_index().to_csv(
+        "cereals_clusters.csv", index=False)
+
 agglomerative_summary = (
     df_cluster_cereals
     .groupby('cluster_agglomerative_cereals')[['Export','Import','Re-Export', 'Re-Import', 'net_usd',
