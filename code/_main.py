@@ -461,6 +461,14 @@ save_csv(df_cluster, "df_cluster.csv")
 save_csv(df_net, "df_net_new.csv")
 save_csv(df_net_IronAndSteel, "df_net_IronAndSteel.csv")
 
+# list of clusters:
+clusters_IronAndSteel = (df_cluster.groupby('cluster_agglomerative_ironsteel')['country_or_area']
+    .apply(list))
+for cluster, countries in clusters_IronAndSteel.items():
+    print(f"Cluster {cluster}:")
+    for c in countries:
+        print(f"  - {c}")
+    print()
 
 # Time Series for Iron&Steel
 
@@ -548,10 +556,7 @@ plt.ylabel('Distance')
 plt.tight_layout()
 plt.show()
 
-
-agg = AgglomerativeClustering(
-    n_clusters=3,
-    linkage='ward')
+agg = AgglomerativeClustering(n_clusters=3, linkage='ward')
 
 df_cluster_cereals['cluster_agglomerative_cereals'] = agg.fit_predict(cereals_scaled)
 
@@ -568,9 +573,6 @@ for cluster, countries in clusters_cereals.items():
     for c in countries:
         print(f"  - {c}")
     print()
-
-    clusters_cereals.reset_index().to_csv(
-        "cereals_clusters.csv", index=False)
 
 agglomerative_summary = (
     df_cluster_cereals
