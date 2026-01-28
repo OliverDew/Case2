@@ -201,45 +201,6 @@ df_net = df_net.merge(
     on='country_or_area',
     how='left')
 
-#K-Means HeatMap
-# Cluster-level averages
-heatmap_data = (
-    df_cluster_cereals
-    .groupby('cluster')[['Export','Import','Re-Export', 'Re-Import', 'net_usd',
-                                 'reexport_ratio', 'reimport_ratio']]
-    .mean())
-
-print(heatmap_data)
-
-scaler_hm = StandardScaler()
-heatmap_scaled = pd.DataFrame(
-    scaler_hm.fit_transform(heatmap_data),
-    index=heatmap_data.index,
-    columns=heatmap_data.columns)
-
-print(heatmap_scaled)
-
-plt.figure(figsize=(8, 5))
-sns.heatmap(
-    heatmap_scaled,
-    annot=True,
-    cmap='coolwarm',
-    center=0,
-    linewidths=0.5)
-
-plt.title('Heatmap: K-Means, Cereals)')
-plt.xlabel('Trade Indicators')
-plt.ylabel('Cluster')
-plt.tight_layout()
-plt.show()
-
-sns.clustermap(
-    heatmap_scaled,
-    cmap='coolwarm',
-    center=0,
-    annot=True,
-    figsize=(8, 6))
-
 #Time-Series K-Means for cereals:
 
 # Pivot to get time series: rows = countries, columns = years
@@ -374,44 +335,6 @@ df_net = df_net.merge(
     on='country_or_area',
     how='left')
 
-#K-Means HeatMap
-# Cluster-level averages
-heatmap_data = (
-    df_cluster
-    .groupby('cluster')[['Export','Import','Re-Export', 'Re-Import', 'net_usd',
-                                 'reexport_ratio', 'reimport_ratio']]
-    .mean())
-
-print(heatmap_data)
-
-scaler_hm = StandardScaler()
-heatmap_scaled = pd.DataFrame(
-    scaler_hm.fit_transform(heatmap_data),
-    index=heatmap_data.index,
-    columns=heatmap_data.columns)
-
-print(heatmap_scaled)
-
-plt.figure(figsize=(8, 5))
-sns.heatmap(
-    heatmap_scaled,
-    annot=True,
-    cmap='coolwarm',
-    center=0,
-    linewidths=0.5)
-
-plt.title('Heatmap: K-Means, Cereals)')
-plt.xlabel('Trade Indicators')
-plt.ylabel('Cluster')
-plt.tight_layout()
-plt.show()
-
-sns.clustermap(
-    heatmap_scaled,
-    cmap='coolwarm',
-    center=0,
-    annot=True,
-    figsize=(8, 6))
 
 # Time Series K Means for Iron&Steel
 
