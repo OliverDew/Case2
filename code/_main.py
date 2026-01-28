@@ -491,36 +491,9 @@ save_csv(cluster_ts_ironsteel, "cluster_ts_ironsteel.csv")
 
 # plot time series for each cluster
 
-# Option A - all features in one plot for each cluster
-features = [
-    "Export",
-    "Import",
-    "Re-Export",
-    "Re-Import",
-    "reexport_ratio",
-    "reimport_ratio",
-    "net_usd"]
-
 clusters = sorted(
     cluster_ts_ironsteel["cluster_agglomerative_ironsteel"].unique())
 
-for c1 in clusters:
-    data = cluster_ts_ironsteel[
-        cluster_ts_ironsteel["cluster_agglomerative_ironsteel"] == c1]
-
-    plt.figure(figsize=(10, 5))
-
-    for feature in features:
-        plt.plot(data["year"], data[feature], label=feature)
-
-    plt.title(f"Iron & Steel – Cluster {c1}")
-    plt.xlabel("Year")
-    plt.ylabel("Value")
-    plt.legend()
-    plt.tight_layout()
-    plt.show()
-
-# Option B - aggregate features to levels and ratios
 level_features = ["Export", "Import", "Re-Export", "Re-Import", "net_usd"]
 ratio_features = ["reexport_ratio", "reimport_ratio"]
 
@@ -655,7 +628,6 @@ save_csv(cluster_ts_cereals, "cluster_ts_cereals.csv")
 # this dataset gives us the time series data for each cluster in cereals
 
 # plot time series for each cluster
-# Option B - aggregate features to levels and ratios
 
 clusters_cereals = sorted(
     cluster_ts_cereals["cluster_agglomerative_cereals"].unique())
