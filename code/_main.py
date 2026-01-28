@@ -528,10 +528,110 @@ plt.ylabel('Export')
 plt.grid(True)
 plt.show()
 
-df_net = df_net.merge(
+# add the clusters as a column to the iron&steel dataset:
+df_net_IronAndSteel = df_net_IronAndSteel.merge(
     df_cluster[['country_or_area', 'cluster_agglomerative_ironsteel']],
     on='country_or_area',
     how='left')
+
+save_csv(df_cluster, "df_cluster.csv")
+save_csv(df_net, "df_net_new.csv")
+save_csv(df_net_IronAndSteel, "df_net_IronAndSteel.csv")
+
+
+# Time Series for Iron&Steel
+
+# sort Data by year:
+df_net_IronAndSteel = df_net_IronAndSteel.sort_values("year")
+
+# Aggregate: one time series per cluster
+# Because each cluster contains many countries, aggregate within each cluster at each time step
+# most common: aggregate with the mean
+cluster_ts_ironsteel = (
+    df_net_IronAndSteel
+    .groupby(["cluster_agglomerative_ironsteel", "year"])[
+        [   "Export",
+            "Import",
+            "Re-Export",
+            "Re-Import",
+            "net_usd",
+            "net_imports",
+            "net_exports",
+            "reexport_ratio",
+            "reimport_ratio",
+            "export_import_ratio"]]
+    .mean()
+    .reset_index())
+
+save_csv(cluster_ts_ironsteel, "cluster_ts_ironsteel.csv")
+# this dataset gives us the time series data for each cluster in iron&steel
+
+# plot time series for each cluster
+
+# Option A
+features = [
+    "Export",
+    "Import",
+    "Re-Export",
+    "Re-Import",
+    "reexport_ratio",
+    "reimport_ratio",
+    "net_usd"]
+
+clusters = sorted(
+    cluster_ts_ironsteel["cluster_agglomerative_ironsteel"].unique())
+
+for c1 in clusters:
+    data = cluster_ts_ironsteel[
+        cluster_ts_ironsteel["cluster_agglomerative_ironsteel"] == c1]
+
+    plt.figure(figsize=(10, 5))
+
+    for feature in features:
+        plt.plot(data["year"], data[feature], label=feature)
+
+    plt.title(f"Iron & Steel – Cluster {c1}")
+    plt.xlabel("Year")
+    plt.ylabel("Value")
+    plt.legend()
+    plt.tight_layout()
+    plt.show()
+
+# Option B
+level_features = ["Export", "Import", "Re-Export", "Re-Import", "net_usd"]
+ratio_features = ["reexport_ratio", "reimport_ratio"]
+
+for c1 in clusters:
+    data = cluster_ts_ironsteel[
+        cluster_ts_ironsteel["cluster_agglomerative_ironsteel"] == c1]
+
+    plt.figure(figsize=(10, 5))
+
+    for feature in level_features:
+        plt.plot(data["year"], data[feature], label=feature)
+
+    plt.title(f"Iron & Steel - Level – Cluster {c1}")
+    plt.xlabel("Year")
+    plt.ylabel("Value")
+    plt.legend()
+    plt.tight_layout()
+    plt.show()
+
+for c1 in clusters:
+    data = cluster_ts_ironsteel[
+        cluster_ts_ironsteel["cluster_agglomerative_ironsteel"] == c1]
+
+    plt.figure(figsize=(10, 5))
+
+    for feature in ratio_features:
+        plt.plot(data["year"], data[feature], label=feature)
+
+    plt.title(f"Iron & Steel - Ratio – Cluster {c1}")
+    plt.xlabel("Year")
+    plt.ylabel("Value")
+    plt.legend()
+    plt.tight_layout()
+    plt.show()
 
 # Agglomerative Clustering for Cereals:
 
