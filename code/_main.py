@@ -491,7 +491,7 @@ save_csv(cluster_ts_ironsteel, "cluster_ts_ironsteel.csv")
 
 # plot time series for each cluster
 
-# Option A
+# Option A - all features in one plot for each cluster
 features = [
     "Export",
     "Import",
@@ -520,7 +520,7 @@ for c1 in clusters:
     plt.tight_layout()
     plt.show()
 
-# Option B
+# Option B - aggregate features to levels and ratios
 level_features = ["Export", "Import", "Re-Export", "Re-Import", "net_usd"]
 ratio_features = ["reexport_ratio", "reimport_ratio"]
 
@@ -555,6 +555,7 @@ for c1 in clusters:
     plt.legend()
     plt.tight_layout()
     plt.show()
+
 
 # Agglomerative Clustering for Cereals:
 
@@ -620,7 +621,73 @@ plt.ylabel('Export')
 plt.grid(True)
 plt.show()
 
-df_net = df_net.merge(
+# add the clusters as a column to the cereals dataset:
+df_net_cereals = df_net_cereals.merge(
     df_cluster_cereals[['country_or_area', 'cluster_agglomerative_cereals']],
     on='country_or_area',
     how='left')
+save_csv(df_net_cereals, "df_net_cereals.csv")
+
+
+# Time Series for Cereals
+
+# sort Data by year:
+df_net_cereals = df_net_cereals.sort_values("year")
+
+# Aggregate: one time series per cluster
+cluster_ts_cereals = (
+    df_net_cereals
+    .groupby(["cluster_agglomerative_cereals", "year"])[
+        [   "Export",
+            "Import",
+            "Re-Export",
+            "Re-Import",
+            "net_usd",
+            "net_imports",
+            "net_exports",
+            "reexport_ratio",
+            "reimport_ratio",
+            "export_import_ratio"]]
+    .mean()
+    .reset_index())
+
+save_csv(cluster_ts_cereals, "cluster_ts_cereals.csv")
+# this dataset gives us the time series data for each cluster in cereals
+
+# plot time series for each cluster
+# Option B - aggregate features to levels and ratios
+
+clusters_cereals = sorted(
+    cluster_ts_cereals["cluster_agglomerative_cereals"].unique())
+
+for c1 in clusters:
+    data = cluster_ts_cereals[
+        cluster_ts_cereals["cluster_agglomerative_cereals"] == c1]
+
+    plt.figure(figsize=(10, 5))
+
+    for feature in level_features:
+        plt.plot(data["year"], data[feature], label=feature)
+
+    plt.title(f"Cereals - Level – Cluster {c1}")
+    plt.xlabel("Year")
+    plt.ylabel("Value")
+    plt.legend()
+    plt.tight_layout()
+    plt.show()
+
+for c1 in clusters:
+    data = cluster_ts_cereals[
+        cluster_ts_cereals["cluster_agglomerative_cereals"] == c1]
+
+    plt.figure(figsize=(10, 5))
+
+    for feature in ratio_features:
+        plt.plot(data["year"], data[feature], label=feature)
+
+    plt.title(f"Cereals - Ratio – Cluster {c1}")
+    plt.xlabel("Year")
+    plt.ylabel("Value")
+    plt.legend()
+    plt.tight_layout()
+    plt.show()
