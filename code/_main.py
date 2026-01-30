@@ -471,7 +471,7 @@ for cluster, countries in clusters_ironsteel.items():
 # Time Series for Iron&Steel
 
 # sort Data by year:
-df_net_ironsteel = df_net_IronAndf_net_ironsteeldSteel.sort_values("year")
+df_net_ironsteel = df_net_ironsteel.sort_values("year")
 
 # Aggregate: one time series per cluster
 # Because each cluster contains many countries, aggregate within each cluster at each time step
