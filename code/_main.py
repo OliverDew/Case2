@@ -70,12 +70,7 @@ save_csv(df_dummy, "dummy.csv")
 print("\nDataset after creating dummy variables for category & flow:")
 print(df_dummy.info())
 
-
-##### Oliver - Create net (import, export, reimport, reexport) values (4) for each year, country and category
-#Aggregate data by one categorical variable
-#bostonHousing_df.groupby(‘CHAS’).mean()
-#Aggregate data by more than one variable -> pivot tables
-#pd.pivot_table(bostonHousing_df, values='MEDV', index=['RM_bin'], columns=['CHAS’], aggfunc='mean’)
+##### Oliver - Aggregate dataframe for country, year, category and flow
 
 aggregated = (
     df.groupby(['country_or_area', 'year', 'category', 'flow'])['trade_usd']
