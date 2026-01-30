@@ -34,7 +34,7 @@ print(df.info())
 
 ##### Oliver - Delete all CSVs except case2 on each run
 for file in CSV_DIR.glob("*.csv"):
-    if file.name != "case2.csv":
+    if file.name not in {"case2.csv", "case2_sampled.csv"}:
         file.unlink()
 
 
