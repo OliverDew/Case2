@@ -667,3 +667,242 @@ for c1 in clusters:
     plt.legend()
     plt.tight_layout()
     plt.show()
+
+#Cluster 0 iron and steel
+
+from statsmodels.tsa.holtwinters import ExponentialSmoothing
+
+# --- 1. PREPARE THE NORMALIZED TIME SERIES ---
+cluster_0_raw = df_net_IronAndSteel[df_net_IronAndSteel["cluster_agglomerative_ironsteel"] == 0].copy()
+
+# Calculate Normalized Trade Balance for each country-year
+# We add a small epsilon (1e-6) to avoid division by zero if trade is ever exactly 0
+cluster_0_raw['ntb_ratio'] = (cluster_0_raw['net_usd']) / (cluster_0_raw['Import'] + cluster_0_raw['Export'] + 1e-6)
+
+# Now aggregate the RATIO by year (Mean of ratios)
+ts_ratio = cluster_0_raw.groupby("year")["ntb_ratio"].mean().sort_index()
+ts_ratio.index = ts_ratio.index.astype(int)
+
+# --- 2. FORECAST HORIZON ---
+h = 12
+
+# --- 3. FIT HOLT'S LINEAR MODEL ---
+# Using the ratio series (ts_ratio)
+model = ExponentialSmoothing(
+    ts_ratio,
+    trend="add",
+    seasonal=None
+).fit()
+
+# --- 4. GENERATE FORECAST ---
+forecast_values = model.forecast(h)
+last_year = ts_ratio.index.max()
+future_years = range(last_year + 1, last_year + h + 1)
+
+forecast = pd.Series(
+    [ts_ratio.iloc[-1]] + list(forecast_values.values),
+    index=[last_year] + list(future_years)
+)
+
+# --- 5. PLOT THE RESULTS ---
+plt.figure(figsize=(10, 5))
+plt.plot(ts_ratio.index, ts_ratio, label="Observed (Avg NTB Ratio)", color='teal', linewidth=2)
+plt.plot(forecast.index, forecast, label="Forecasted Ratio", color='orange', linestyle="--", linewidth=2)
+
+plt.axhline(0, color='black', linewidth=1, alpha=0.5) # The "Balance" line
+plt.title("Iron & Steel – Cluster 0 – Structural Trade Balance Forecast")
+plt.xlabel("Year")
+plt.ylabel("NTB Ratio (Exports-Imports / Total Trade)")
+plt.grid(True, alpha=0.3)
+plt.legend()
+plt.show()
+
+
+# 1. Filter data for Cluster 0 and set Year as index
+c0_data = cluster_ts_ironsteel[
+    cluster_ts_ironsteel["cluster_agglomerative_ironsteel"] == 0
+    ].sort_values("year").set_index("year")
+
+# Define our two groups based on your methodology
+level_features = ["Export", "Import", "net_usd"]
+ratio_features = ["reexport_ratio", "reimport_ratio"]
+h = 12  # Forecast horizon (up to 2028ish)
+
+# --- A. FORECASTING LEVELS (Holt's Linear Trend) ---
+plt.figure(figsize=(12, 6))
+for feature in level_features:
+    ts = c0_data[feature]
+
+    # Levels represent scale/volume; we use an additive trend
+    model = ExponentialSmoothing(ts, trend="add", seasonal=None).fit()
+    forecast_values = model.forecast(h)
+
+    # Plotting
+    line, = plt.plot(ts.index, ts, label=f"Observed {feature}")
+    plt.plot(range(ts.index.max(), ts.index.max() + h + 1),
+             [ts.iloc[-1]] + list(forecast_values),
+             linestyle="--", color=line.get_color(), label=f"Forecast {feature}")
+
+plt.title("Iron & Steel – Cluster 0 – Level Features Forecast (USD)")
+plt.ylabel("Value (USD)")
+plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left')
+plt.grid(True, alpha=0.3)
+plt.tight_layout()
+plt.show()
+
+# --- B. FORECASTING RATIOS (Simple Exponential Smoothing) ---
+from statsmodels.tsa.holtwinters import SimpleExpSmoothing
+plt.figure(figsize=(12, 6))
+for feature in ratio_features:
+    ts = c0_data[feature]
+
+# Ratios represent structure/identity; SES is better for mean-reversion
+    model = SimpleExpSmoothing(ts).fit()
+    forecast_values = model.forecast(h)
+
+# Plotting
+    line, = plt.plot(ts.index, ts, label=f"Observed {feature}")
+    plt.plot(range(ts.index.max(), ts.index.max() + h + 1),
+             [ts.iloc[-1]] + list(forecast_values),
+             linestyle="--", color=line.get_color(), label=f"Forecast {feature}")
+
+plt.title("Iron & Steel – Cluster 0 – Structural Ratio Forecast")
+plt.ylabel("Ratio (0 to 1)")
+plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left')
+plt.grid(True, alpha=0.3)
+plt.tight_layout()
+plt.show()
+
+#Forecast for cluster 1 for iron and steel
+
+# 1. Filter specifically for Cluster 1
+c1_data = cluster_ts_ironsteel[
+    cluster_ts_ironsteel["cluster_agglomerative_ironsteel"] == 1
+    ].sort_values("year").set_index("year")
+
+# Re-using your defined groups
+level_features = ["Export", "Import", "net_usd"]
+ratio_features = ["reexport_ratio", "reimport_ratio"]
+h = 12
+
+# --- A. FORECASTING LEVELS (Holt's Linear Trend) ---
+# For producers, we use damped_trend=True to keep growth projections realistic
+plt.figure(figsize=(12, 6))
+for feature in level_features:
+    ts = c1_data[feature]
+
+    # Use additive trend with damping for these high-volume exporters
+    model = ExponentialSmoothing(ts, trend="add", damped_trend=True, seasonal=None).fit()
+    forecast_values = model.forecast(h)
+
+    line, = plt.plot(ts.index, ts, label=f"Observed {feature}", linewidth=2)
+    plt.plot(range(ts.index.max(), ts.index.max() + h + 1),
+             [ts.iloc[-1]] + list(forecast_values),
+             linestyle="--", color=line.get_color(), label=f"Forecast {feature}")
+
+plt.title("Iron & Steel – Cluster 1 – Producer Level Forecast (Scale: 1e9 USD)")
+plt.ylabel("Value (USD)")
+plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left')
+plt.grid(True, alpha=0.3)
+plt.tight_layout()
+plt.show()
+
+# --- B. FORECASTING RATIOS (Simple Exponential Smoothing) ---
+plt.figure(figsize=(12, 6))
+for feature in ratio_features:
+    ts = c1_data[feature]
+
+    # SES is best here because Cluster 1 ratios are near-zero and noisy
+    model = SimpleExpSmoothing(ts).fit()
+    forecast_values = model.forecast(h)
+
+    line, = plt.plot(ts.index, ts, label=f"Observed {feature}", linewidth=2)
+    plt.plot(range(ts.index.max(), ts.index.max() + h + 1),
+             [ts.iloc[-1]] + list(forecast_values),
+             linestyle="--", color=line.get_color(), label=f"Forecast {feature}")
+
+plt.title("Iron & Steel – Cluster 1 – Producer Ratio Forecast")
+plt.ylabel("Ratio Value")
+plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left')
+plt.grid(True, alpha=0.3)
+plt.tight_layout()
+plt.show()
+
+#Forecast for Cluster 2
+# 1. Filter specifically for Cluster 2
+c2_data = cluster_ts_ironsteel[
+    cluster_ts_ironsteel["cluster_agglomerative_ironsteel"] == 2
+    ].sort_values("year").set_index("year")
+
+# Re-using your defined groups to maintain consistency
+level_features = ["Export", "Import", "net_usd"]
+ratio_features = ["reexport_ratio", "reimport_ratio"]
+h = 12
+
+# --- A. FORECASTING LEVELS (Damped Holt's) ---
+# Damping is essential here to handle the extreme 2011-2013 volatility
+plt.figure(figsize=(12, 6))
+for feature in level_features:
+    ts = c2_data[feature]
+
+    # We use damped_trend=True because the spikes in Cluster 2 are likely outliers
+    model = ExponentialSmoothing(ts, trend="add", damped_trend=True, seasonal=None).fit()
+    forecast_values = model.forecast(h)
+
+    line, = plt.plot(ts.index, ts, label=f"Observed {feature}", linewidth=2)
+    plt.plot(range(ts.index.max(), ts.index.max() + h + 1),
+             [ts.iloc[-1]] + list(forecast_values),
+             linestyle="--", color=line.get_color(), label=f"Forecast {feature}")
+
+plt.title("Iron & Steel – Cluster 2 – Volatile Level Forecast (USD)")
+plt.ylabel("Value (USD)")
+plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left')
+plt.grid(True, alpha=0.3)
+plt.tight_layout()
+plt.show()
+
+# Forecast for Cluster 0 – Cereals
+
+ts = (
+    cluster_ts_cereals[
+        cluster_ts_cereals["cluster_agglomerative_cereals"] == 0
+    ]
+    .sort_values("year")
+    .set_index("year")["net_usd"]
+)
+
+ts.index = ts.index.astype(int)
+
+h = 15
+
+model = ExponentialSmoothing(
+    ts,
+    trend="add",
+    seasonal=None
+).fit()
+
+forecast_values = model.forecast(h)
+
+last_year = ts.index.max()
+future_years = range(last_year + 1, last_year + h + 1)
+
+forecast = pd.Series(
+    forecast_values.values,
+    index=future_years
+)
+
+plt.figure(figsize=(9,5))
+plt.plot(ts.index, ts, label="Observed", linewidth=2)
+plt.plot(forecast.index, forecast, linestyle="--", label="Forecast", linewidth=2)
+
+plt.axvline(x=last_year, color="gray", linestyle=":", alpha=0.6)
+
+plt.title("Cereals – Cluster 0 – net_usd Forecast")
+plt.xlabel("Year")
+plt.ylabel("USD")
+plt.legend()
+plt.grid(True)
+plt.tight_layout()
+plt.show()
+
+
