@@ -72,17 +72,24 @@ print(df_dummy.info())
 
 
 ##### Oliver - Create net (import, export, reimport, reexport) values (4) for each year, country and category
+#Aggregate data by one categorical variable
+#bostonHousing_df.groupby(‘CHAS’).mean()
+#Aggregate data by more than one variable -> pivot tables
+#pd.pivot_table(bostonHousing_df, values='MEDV', index=['RM_bin'], columns=['CHAS’], aggfunc='mean’)
 
 aggregated = (
-    df.groupby(['country_or_area', 'year', 'category', 'flow'], as_index=False)
-      .agg(trade_usd_sum=('trade_usd', 'sum'))
+    df.groupby(['country_or_area', 'year', 'category', 'flow'])['trade_usd']
+      .sum()
+      .reset_index(name='trade_usd_sum')
 )
 
 # Pivot flows into columns
-pivot = aggregated.pivot_table(
-    index=['country_or_area', 'year', 'category'],
-    columns='flow',
+pivot = pd.pivot_table(
+    aggregated,
     values='trade_usd_sum',
+    index=['country_or_area', 'year', 'category'],
+    columns=['flow'],
+    aggfunc='sum',
     fill_value=0
 )
 
