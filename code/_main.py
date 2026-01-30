@@ -108,20 +108,15 @@ print(df_net_cereals.head())
 df_net_IronAndSteel = df_net.loc[df_net['category'] == '72_iron_and_steel', :]
 print(df_net_IronAndSteel.head())
 
-#Thao: K-Means
-#Vera: differentiate between categories, adjusting features and k
-
-# K-Means for Cereals:
-
-# 1. Aggregate per country
+# preparation for Clustering of Cereals:
+# Aggregate per country
 df_cluster_cereals = (
     df_net_cereals
     .groupby('country_or_area')[['Export','Import','Re-Export', 'Re-Import', 'net_usd',
                                  'reexport_ratio', 'reimport_ratio']]
     .mean()
     .reset_index())
-
-# 2. Scale
+# Rescale
 scaler = StandardScaler()
 cereals_scaled = scaler.fit_transform(
     df_cluster_cereals[['Export','Import','Re-Export', 'Re-Import', 'net_usd',
@@ -129,8 +124,28 @@ cereals_scaled = scaler.fit_transform(
 print("cereals_scaled type:", type(cereals_scaled))
 print("cereals_scaled shape:", cereals_scaled.shape)
 
+# Preparation of Clustering for Iron&Steel:
+# Aggregate per country
+df_cluster = (
+    df_net_IronAndSteel
+    .groupby('country_or_area')[['Export','Import','Re-Export', 'Re-Import', 'net_usd',
+                                 'reexport_ratio', 'reimport_ratio']]
+    .mean()
+    .reset_index())
+# Rescale
+ironsteel_scaled = scaler.fit_transform(
+    df_cluster[['Export','Import','Re-Export', 'Re-Import', 'net_usd',
+                                 'reexport_ratio', 'reimport_ratio']])
+print("Iron&Steel_scaled type:", type(ironsteel_scaled))
+print("Iron&Steel_scaled shape:", ironsteel_scaled.shape)
 
-# 3. Elbow method
+
+#Thao: K-Means
+#Vera: differentiate between categories, adjusting features and k
+
+# K-Means for Cereals:
+
+# Elbow method
 inertia = []
 for k in range(1, 11):
     kmeans = KMeans(n_clusters=k, random_state=42, n_init=10)
@@ -145,11 +160,11 @@ plt.title('Optimal k for Cereals')
 plt.grid(True)
 plt.show()
 
-# 4. Final K-Means (k = 7)
+# Final K-Means (k = 7)
 kmeans = KMeans(n_clusters=7, random_state=42, n_init=10)
 df_cluster_cereals['cluster'] = kmeans.fit_predict(cereals_scaled)
 
-# 5. Cluster centroids in ORIGINAL units
+# Cluster centroids in ORIGINAL units
 centroids = pd.DataFrame(
     scaler.inverse_transform(kmeans.cluster_centers_),
     columns=['Export','Import','Re-Export', 'Re-Import', 'net_usd',
@@ -158,14 +173,14 @@ centroids = pd.DataFrame(
 print("Cluster centroids (original scale):")
 print(centroids)
 
-# 6. Euclidean distances between cluster centers (scaled space)
+# Euclidean distances between cluster centers (scaled space)
 Euclidean = pd.DataFrame(
     pairwise_distances(kmeans.cluster_centers_, metric='euclidean'))
 
 print("Euclidean distances between clusters:")
 print(Euclidean)
 
-# 7. Cluster summary (same as centroids but easier to explain)
+# Cluster summary (same as centroids but easier to explain)
 cluster_summary = (
     df_cluster_cereals
     .groupby('cluster')[['Export','Import','Re-Export', 'Re-Import', 'net_usd',
@@ -174,7 +189,7 @@ cluster_summary = (
 
 print(cluster_summary)
 
-# 8. 2D Visualization
+# 2D Visualization
 plt.figure(figsize=(10, 6))
 sns.scatterplot(
     data=df_cluster_cereals,
@@ -188,7 +203,7 @@ plt.ylabel('Exports')
 plt.grid(True)
 plt.show()
 
-# 9. Merge clusters back to df_net
+# Merge clusters back to df_net
 df_net = df_net.merge(
     df_cluster_cereals[['country_or_area', 'cluster']],
     on='country_or_area',
@@ -247,24 +262,7 @@ print(df_net[['country_or_area', 'cluster_ts']].drop_duplicates())
 
 #K-Means for Iron&Steel
 
-# 1. Aggregate per country
-df_cluster = (
-    df_net_IronAndSteel
-    .groupby('country_or_area')[['Export','Import','Re-Export', 'Re-Import', 'net_usd',
-                                 'reexport_ratio', 'reimport_ratio']]
-    .mean()
-    .reset_index())
-
-# 2. Scale
-scaler = StandardScaler()
-ironsteel_scaled = scaler.fit_transform(
-    df_cluster[['Export','Import','Re-Export', 'Re-Import', 'net_usd',
-                                 'reexport_ratio', 'reimport_ratio']])
-print("Iron&Steel_scaled type:", type(ironsteel_scaled))
-print("Iron&Steel_scaled shape:", ironsteel_scaled.shape)
-
-
-# 3. Elbow method
+# Elbow method
 inertia = []
 for k in range(1, 11):
     kmeans = KMeans(n_clusters=k, random_state=42, n_init=10)
@@ -279,11 +277,11 @@ plt.title('Optimal k for Iron&Steel')
 plt.grid(True)
 plt.show()
 
-# 4. Final K-Means (k = 7)
+# Final K-Means (k = 7)
 kmeans = KMeans(n_clusters=7, random_state=42, n_init=10)
 df_cluster['cluster'] = kmeans.fit_predict(ironsteel_scaled)
 
-# 5. Cluster centroids in ORIGINAL units
+# Cluster centroids in ORIGINAL units
 centroids = pd.DataFrame(
     scaler.inverse_transform(kmeans.cluster_centers_),
     columns=['Export','Import','Re-Export', 'Re-Import', 'net_usd',
@@ -292,14 +290,14 @@ centroids = pd.DataFrame(
 print("Cluster centroids (original scale):")
 print(centroids)
 
-# 6. Euclidean distances between cluster centers (scaled space)
+# Euclidean distances between cluster centers (scaled space)
 Euclidean = pd.DataFrame(
     pairwise_distances(kmeans.cluster_centers_, metric='euclidean'))
 
 print("Euclidean distances between clusters:")
 print(Euclidean)
 
-# 7. Cluster summary (same as centroids but easier to explain)
+# Cluster summary (same as centroids but easier to explain)
 cluster_summary = (
     df_cluster
     .groupby('cluster')[['Export','Import','Re-Export', 'Re-Import', 'net_usd',
@@ -308,7 +306,7 @@ cluster_summary = (
 
 print(cluster_summary)
 
-# 8. 2D Visualization
+# 2D Visualization
 plt.figure(figsize=(10, 6))
 sns.scatterplot(
     data=df_cluster,
@@ -322,7 +320,7 @@ plt.ylabel('Exports')
 plt.grid(True)
 plt.show()
 
-# 9. Merge clusters back to df_net
+# Merge clusters back to df_net
 df_net = df_net.merge(
     df_cluster[['country_or_area', 'cluster']],
     on='country_or_area',
