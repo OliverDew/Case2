@@ -32,6 +32,12 @@ print("Initial Dataset:")
 print(df.info())
 
 
+##### Oliver - Delete all CSVs except case2 on each run
+for file in CSV_DIR.glob("*.csv"):
+    if file.name != "case2.csv":
+        file.unlink()
+
+
 ##### Paula - Clean & Remove Columns (Remove EU28, Convert Federal Rep. of Germany to Germany)
 df = df.drop(columns=["commodity", "comm_code"])
 df = df[~df["country_or_area"].isin([
@@ -105,8 +111,8 @@ print(df_net.describe())
 df_net_cereals = df_net.loc[df_net['category'] == '10_cereals', :]
 print(df_net_cereals.head())
 
-df_net_IronAndSteel = df_net.loc[df_net['category'] == '72_iron_and_steel', :]
-print(df_net_IronAndSteel.head())
+df_net_ironsteel = df_net.loc[df_net['category'] == '72_iron_and_steel', :]
+print(df_net_ironsteel.head())
 
 # preparation for Clustering of Cereals:
 # Aggregate per country
@@ -117,8 +123,8 @@ df_cluster_cereals = (
     .mean()
     .reset_index())
 # Rescale
-scaler = StandardScaler()
-cereals_scaled = scaler.fit_transform(
+scaler_cereals = StandardScaler()
+cereals_scaled = scaler_cereals.fit_transform(
     df_cluster_cereals[['Export','Import','Re-Export', 'Re-Import', 'net_usd',
                                  'reexport_ratio', 'reimport_ratio']])
 print("cereals_scaled type:", type(cereals_scaled))
@@ -126,15 +132,16 @@ print("cereals_scaled shape:", cereals_scaled.shape)
 
 # Preparation of Clustering for Iron&Steel:
 # Aggregate per country
-df_cluster = (
-    df_net_IronAndSteel
+df_cluster_ironsteel = (
+    df_net_ironsteel
     .groupby('country_or_area')[['Export','Import','Re-Export', 'Re-Import', 'net_usd',
                                  'reexport_ratio', 'reimport_ratio']]
     .mean()
     .reset_index())
 # Rescale
-ironsteel_scaled = scaler.fit_transform(
-    df_cluster[['Export','Import','Re-Export', 'Re-Import', 'net_usd',
+scaler_ironsteel = StandardScaler()
+ironsteel_scaled = scaler_ironsteel.fit_transform(
+    df_cluster_ironsteel[['Export','Import','Re-Export', 'Re-Import', 'net_usd',
                                  'reexport_ratio', 'reimport_ratio']])
 print("Iron&Steel_scaled type:", type(ironsteel_scaled))
 print("Iron&Steel_scaled shape:", ironsteel_scaled.shape)
@@ -166,7 +173,7 @@ df_cluster_cereals['cluster'] = kmeans.fit_predict(cereals_scaled)
 
 # Cluster centroids in ORIGINAL units
 centroids = pd.DataFrame(
-    scaler.inverse_transform(kmeans.cluster_centers_),
+    scaler_cereals.inverse_transform(kmeans.cluster_centers_),
     columns=['Export','Import','Re-Export', 'Re-Import', 'net_usd',
                                  'reexport_ratio', 'reimport_ratio'])
 
@@ -216,8 +223,8 @@ ts_data = df_net_cereals.pivot(index='country_or_area', columns='year', values='
 
 print(ts_data.head())
 
-scaler = StandardScaler()
-ts_scaled = scaler.fit_transform(ts_data)
+scaler_cereals = StandardScaler()
+ts_scaled = scaler_cereals.fit_transform(ts_data)
 
 ts_scaled_3d = to_time_series_dataset(ts_scaled)
 print(ts_scaled_3d.shape)  # (n_countries, n_years, 1)
@@ -279,11 +286,11 @@ plt.show()
 
 # Final K-Means (k = 7)
 kmeans = KMeans(n_clusters=7, random_state=42, n_init=10)
-df_cluster['cluster'] = kmeans.fit_predict(ironsteel_scaled)
+df_cluster_ironsteel['cluster'] = kmeans.fit_predict(ironsteel_scaled)
 
 # Cluster centroids in ORIGINAL units
 centroids = pd.DataFrame(
-    scaler.inverse_transform(kmeans.cluster_centers_),
+    scaler_ironsteel.inverse_transform(kmeans.cluster_centers_),
     columns=['Export','Import','Re-Export', 'Re-Import', 'net_usd',
                                  'reexport_ratio', 'reimport_ratio'])
 
@@ -299,7 +306,7 @@ print(Euclidean)
 
 # Cluster summary (same as centroids but easier to explain)
 cluster_summary = (
-    df_cluster
+    df_cluster_ironsteel
     .groupby('cluster')[['Export','Import','Re-Export', 'Re-Import', 'net_usd',
                                  'reexport_ratio', 'reimport_ratio']]
     .mean())
@@ -309,7 +316,7 @@ print(cluster_summary)
 # 2D Visualization
 plt.figure(figsize=(10, 6))
 sns.scatterplot(
-    data=df_cluster,
+    data=df_cluster_ironsteel,
     x='Import',
     y='Export',
     hue='cluster',
@@ -322,7 +329,7 @@ plt.show()
 
 # Merge clusters back to df_net
 df_net = df_net.merge(
-    df_cluster[['country_or_area', 'cluster']],
+    df_cluster_ironsteel[['country_or_area', 'cluster']],
     on='country_or_area',
     how='left')
 
@@ -330,11 +337,11 @@ df_net = df_net.merge(
 # Time Series K Means for Iron&Steel
 
 # Pivot to time-series format
-ts_data = df_net_IronAndSteel.pivot(index='country_or_area', columns='year', values='net_usd').fillna(0)
+ts_data = df_net_ironsteel.pivot(index='country_or_area', columns='year', values='net_usd').fillna(0)
 
 # Scale each country's series
-scaler = StandardScaler()
-ts_scaled = scaler.fit_transform(ts_data)
+scaler_ironsteel = StandardScaler()
+ts_scaled = scaler_ironsteel.fit_transform(ts_data)
 
 # Convert to tslearn 3D format
 ts_scaled_3d = to_time_series_dataset(ts_scaled)
@@ -401,7 +408,7 @@ Z = linkage(ironsteel_scaled, method='ward')
 plt.figure(figsize=(12, 6))
 dendrogram(
     Z,
-    labels=df_cluster['country_or_area'].values,
+    labels=df_cluster_ironsteel['country_or_area'].values,
     leaf_rotation=90,
     leaf_font_size=8)
 
@@ -416,12 +423,12 @@ agg = AgglomerativeClustering(
     n_clusters=3,
     linkage='ward')
 
-df_cluster['cluster_agglomerative_ironsteel'] = agg.fit_predict(ironsteel_scaled)
+df_cluster_ironsteel['cluster_agglomerative_ironsteel'] = agg.fit_predict(ironsteel_scaled)
 
-print(df_cluster.head())
+print(df_cluster_ironsteel.head())
 
 agglomerative_summary = (
-    df_cluster
+    df_cluster_ironsteel
     .groupby('cluster_agglomerative_ironsteel')[['Export','Import','Re-Export', 'Re-Import', 'net_usd',
                                  'reexport_ratio', 'reimport_ratio']]
     .mean())
@@ -430,7 +437,7 @@ print(agglomerative_summary)
 
 plt.figure(figsize=(10, 6))
 sns.scatterplot(
-    data=df_cluster,
+    data=df_cluster_ironsteel,
     x='Import',
     y='Export',
     hue='cluster_agglomerative_ironsteel',
@@ -443,19 +450,19 @@ plt.grid(True)
 plt.show()
 
 # add the clusters as a column to the iron&steel dataset:
-df_net_IronAndSteel = df_net_IronAndSteel.merge(
-    df_cluster[['country_or_area', 'cluster_agglomerative_ironsteel']],
+df_net_ironsteel = df_net_ironsteel.merge(
+    df_cluster_ironsteel[['country_or_area', 'cluster_agglomerative_ironsteel']],
     on='country_or_area',
     how='left')
 
-save_csv(df_cluster, "df_cluster.csv")
+save_csv(df_cluster_ironsteel, "df_cluster_ironsteel.csv")
 save_csv(df_net, "df_net_new.csv")
-save_csv(df_net_IronAndSteel, "df_net_IronAndSteel.csv")
+save_csv(df_net_ironsteel, "df_net_ironsteel.csv")
 
 # list of clusters:
-clusters_IronAndSteel = (df_cluster.groupby('cluster_agglomerative_ironsteel')['country_or_area']
+clusters_ironsteel = (df_cluster_ironsteel.groupby('cluster_agglomerative_ironsteel')['country_or_area']
     .apply(list))
-for cluster, countries in clusters_IronAndSteel.items():
+for cluster, countries in clusters_ironsteel.items():
     print(f"Cluster {cluster}:")
     for c in countries:
         print(f"  - {c}")
@@ -464,13 +471,13 @@ for cluster, countries in clusters_IronAndSteel.items():
 # Time Series for Iron&Steel
 
 # sort Data by year:
-df_net_IronAndSteel = df_net_IronAndSteel.sort_values("year")
+df_net_ironsteel = df_net_IronAndf_net_ironsteeldSteel.sort_values("year")
 
 # Aggregate: one time series per cluster
 # Because each cluster contains many countries, aggregate within each cluster at each time step
 # most common: aggregate with the mean
 cluster_ts_ironsteel = (
-    df_net_IronAndSteel
+    df_net_ironsteel
     .groupby(["cluster_agglomerative_ironsteel", "year"])[
         [   "Export",
             "Import",
@@ -661,7 +668,7 @@ for c1 in clusters:
 #Cluster 0 iron and steel
 
 # --- 1. PREPARE THE NORMALIZED TIME SERIES ---
-cluster_0_raw = df_net_IronAndSteel[df_net_IronAndSteel["cluster_agglomerative_ironsteel"] == 0].copy()
+cluster_0_raw = df_net_ironsteel[df_net_ironsteel["cluster_agglomerative_ironsteel"] == 0].copy()
 
 # Calculate Normalized Trade Balance for each country-year
 # We add a small epsilon (1e-6) to avoid division by zero if trade is ever exactly 0
