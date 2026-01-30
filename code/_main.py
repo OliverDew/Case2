@@ -12,6 +12,8 @@ from tslearn.utils import to_time_series_dataset
 from tslearn.clustering import TimeSeriesKMeans
 from sklearn import preprocessing
 from pathlib import Path
+from statsmodels.tsa.holtwinters import ExponentialSmoothing
+from statsmodels.tsa.holtwinters import SimpleExpSmoothing
 
 
 ##### Oliver Save CSV function
@@ -58,25 +60,17 @@ else:
 print("\nDataset after stratified sampling of countries as classes:")
 print(df.info())
 
-##### Vera - Deal with missing values in weight category
-df['weight_kg'] = df['weight_kg'].fillna(df['weight_kg'].median())
-
-print("\nDataset after dealing with missing values in weight category:")
+##### Vera - Find missing values
+df.info()
 print(df.info())
-
-##### Vera - Create Dummy Variables for Category & Flow
-df_dummy = (pd.get_dummies(df, columns = ['category', 'flow'], prefix_sep='_', dummy_na=False, dtype='int'))
-save_csv(df_dummy, "dummy.csv")
-print("\nDataset after creating dummy variables for category & flow:")
-print(df_dummy.info())
+# -> missing values only in weight_kg column; we do not use that, so no need to deal with the missing values
 
 ##### Oliver - Aggregate dataframe for country, year, category and flow
 
 aggregated = (
     df.groupby(['country_or_area', 'year', 'category', 'flow'])['trade_usd']
       .sum()
-      .reset_index(name='trade_usd_sum')
-)
+      .reset_index(name='trade_usd_sum'))
 
 # Pivot flows into columns
 pivot = pd.pivot_table(
@@ -85,8 +79,7 @@ pivot = pd.pivot_table(
     index=['country_or_area', 'year', 'category'],
     columns=['flow'],
     aggfunc='sum',
-    fill_value=0
-)
+    fill_value=0)
 
 df_net = pivot.reset_index()
 
@@ -99,8 +92,6 @@ df_net["reexport_ratio"] = df_net["Re-Export"] / df_net["net_exports"]
 df_net["reimport_ratio"] = df_net["Re-Import"] / df_net["net_imports"]
 df_net.loc[df_net["net_exports"] == 0, "reexport_ratio"] = 0
 df_net.loc[df_net["net_imports"] == 0, "reimport_ratio"] = 0
-
-df_net["export_import_ratio"] = df_net["net_exports"] / df_net["net_imports"]
 
 # Save
 save_csv(df_net, "net_trade_by_flow.csv")
@@ -491,8 +482,7 @@ cluster_ts_ironsteel = (
             "net_imports",
             "net_exports",
             "reexport_ratio",
-            "reimport_ratio",
-            "export_import_ratio"]]
+            "reimport_ratio",]]
     .mean()
     .reset_index())
 
@@ -623,8 +613,7 @@ cluster_ts_cereals = (
             "net_imports",
             "net_exports",
             "reexport_ratio",
-            "reimport_ratio",
-            "export_import_ratio"]]
+            "reimport_ratio",]]
     .mean()
     .reset_index())
 
@@ -668,9 +657,10 @@ for c1 in clusters:
     plt.tight_layout()
     plt.show()
 
-#Cluster 0 iron and steel
 
-from statsmodels.tsa.holtwinters import ExponentialSmoothing
+# FORECASTING:
+
+#Cluster 0 iron and steel
 
 # --- 1. PREPARE THE NORMALIZED TIME SERIES ---
 cluster_0_raw = df_net_IronAndSteel[df_net_IronAndSteel["cluster_agglomerative_ironsteel"] == 0].copy()
@@ -691,8 +681,7 @@ h = 12
 model = ExponentialSmoothing(
     ts_ratio,
     trend="add",
-    seasonal=None
-).fit()
+    seasonal=None).fit()
 
 # --- 4. GENERATE FORECAST ---
 forecast_values = model.forecast(h)
@@ -701,8 +690,7 @@ future_years = range(last_year + 1, last_year + h + 1)
 
 forecast = pd.Series(
     [ts_ratio.iloc[-1]] + list(forecast_values.values),
-    index=[last_year] + list(future_years)
-)
+    index=[last_year] + list(future_years))
 
 # --- 5. PLOT THE RESULTS ---
 plt.figure(figsize=(10, 5))
@@ -751,7 +739,6 @@ plt.tight_layout()
 plt.show()
 
 # --- B. FORECASTING RATIOS (Simple Exponential Smoothing) ---
-from statsmodels.tsa.holtwinters import SimpleExpSmoothing
 plt.figure(figsize=(12, 6))
 for feature in ratio_features:
     ts = c0_data[feature]
@@ -863,13 +850,9 @@ plt.show()
 
 # Forecast for Cluster 0 – Cereals
 
-ts = (
-    cluster_ts_cereals[
-        cluster_ts_cereals["cluster_agglomerative_cereals"] == 0
-    ]
+ts = (cluster_ts_cereals[cluster_ts_cereals["cluster_agglomerative_cereals"] == 0]
     .sort_values("year")
-    .set_index("year")["net_usd"]
-)
+    .set_index("year")["net_usd"])
 
 ts.index = ts.index.astype(int)
 
@@ -878,8 +861,7 @@ h = 15
 model = ExponentialSmoothing(
     ts,
     trend="add",
-    seasonal=None
-).fit()
+    seasonal=None).fit()
 
 forecast_values = model.forecast(h)
 
@@ -888,8 +870,7 @@ future_years = range(last_year + 1, last_year + h + 1)
 
 forecast = pd.Series(
     forecast_values.values,
-    index=future_years
-)
+    index=future_years)
 
 plt.figure(figsize=(9,5))
 plt.plot(ts.index, ts, label="Observed", linewidth=2)
