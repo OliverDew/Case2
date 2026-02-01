@@ -856,8 +856,8 @@ plt.show()
 # Forecast for Cluster 0 – Cereals
 
 ts = (cluster_ts_cereals[cluster_ts_cereals["cluster_agglomerative_cereals"] == 0]
-    .sort_values("year")
-    .set_index("year")["net_usd"])
+      .sort_values("year")
+      .set_index("year")["net_usd"])   # <-- keep it 1D
 
 ts.index = ts.index.astype(int)
 
@@ -866,20 +866,25 @@ h = 15
 model = ExponentialSmoothing(
     ts,
     trend="add",
-    seasonal=None).fit()
+    damped_trend=True,
+    seasonal=None,
+    use_boxcox=True          # <-- put it here (version-safe)
+).fit()
 
 forecast_values = model.forecast(h)
 
-last_year = ts.index.max()
+last_year = int(ts.index.max())
 future_years = range(last_year + 1, last_year + h + 1)
 
-forecast = pd.Series(
-    forecast_values.values,
-    index=future_years)
+forecast = pd.Series(forecast_values.values, index=future_years)
+
+# connector point (scalar!)
+last_value = float(ts.loc[last_year])
+forecast_plot = pd.concat([pd.Series({last_year: last_value}), forecast])
 
 plt.figure(figsize=(9,5))
-plt.plot(ts.index, ts, label="Observed", linewidth=2)
-plt.plot(forecast.index, forecast, linestyle="--", label="Forecast", linewidth=2)
+plt.plot(ts.index, ts.values, label="Observed", linewidth=2)
+plt.plot(forecast_plot.index, forecast_plot.values, linestyle="--", label="Forecast", linewidth=2)
 
 plt.axvline(x=last_year, color="gray", linestyle=":", alpha=0.6)
 
@@ -891,4 +896,44 @@ plt.grid(True)
 plt.tight_layout()
 plt.show()
 
+#Cluster 1 cereals forecasting
+ts = (cluster_ts_cereals[cluster_ts_cereals["cluster_agglomerative_cereals"] == 1]
+      .sort_values("year")
+      .set_index("year")["net_usd"])
 
+ts.index = ts.index.astype(int)
+
+h = 15
+
+# neg values dont work with box-cox
+model = ExponentialSmoothing(
+    ts,
+    trend="add",
+    damped_trend=True,
+    seasonal=None,
+).fit()
+
+forecast_values = model.forecast(h)
+
+last_year = int(ts.index.max())
+future_years = range(last_year + 1, last_year + h + 1)
+
+forecast = pd.Series(forecast_values.values, index=future_years)
+
+# connector point (scalar!)
+last_value = float(ts.loc[last_year])
+forecast_plot = pd.concat([pd.Series({last_year: last_value}), forecast])
+
+plt.figure(figsize=(9,5))
+plt.plot(ts.index, ts.values, label="Observed", linewidth=2)
+plt.plot(forecast_plot.index, forecast_plot.values, linestyle="--", label="Forecast", linewidth=2)
+
+plt.axvline(x=last_year, color="gray", linestyle=":", alpha=0.6)
+
+plt.title("Cereals – Cluster 1 – net_usd Forecast")
+plt.xlabel("Year")
+plt.ylabel("USD")
+plt.legend()
+plt.grid(True)
+plt.tight_layout()
+plt.show()
