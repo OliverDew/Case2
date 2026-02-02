@@ -309,6 +309,7 @@ df_net_cereals = df_net_cereals.merge(
     how='left')
 save_csv(df_net_cereals, "df_net_cereals.csv")
 
+
 # Time Series for Cereals
 
 # sort Data by year:
