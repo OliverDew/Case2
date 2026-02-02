@@ -11,11 +11,9 @@ from pathlib import Path
 from statsmodels.tsa.holtwinters import ExponentialSmoothing
 from statsmodels.tsa.holtwinters import SimpleExpSmoothing
 
-
 ##### Oliver Save CSV function
 def save_csv(dataframe: DataFrame, name_of_csv: str):
     dataframe.to_csv(CSV_DIR / name_of_csv, index=False)
-
 
 ##### Oliver - Read CSV
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
@@ -27,22 +25,26 @@ df = read_csv(CSV_DIR / "case2.csv", sep=";")
 print("Initial Dataset:")
 print(df.info())
 
-
 ##### Oliver - Delete all CSVs except case2 and sample on each run
 for file in CSV_DIR.glob("*.csv"):
     if file.name not in {"case2.csv", "case2_sampled.csv"}:
         file.unlink()
 
-##### Paula - Clean & Remove Columns (Remove EU28, Convert Federal Rep. of Germany to Germany)
+# Paula - Clean and Remove Columns
 df = df.drop(columns=["commodity", "comm_code"])
 df = df[~df["country_or_area"].isin([
     "EU-28",
-    "So. African Customs Union"])]
+    "So. African Customs Union",
+    "Other Asia, nes"])]
 df["country_or_area"] = df["country_or_area"].replace(
     "Fmr Fed. Rep. of Germany", "Germany")
+df["country_or_area"] = df["country_or_area"].replace(
+    "Fmr Sudan", "Sudan")
 
-print("\nDataset after dropping columns \"commodity\" and \"comm_code\" and removing EU28, Converting Federal Rep. of Germany to Germany:")
+print("\nDataset after dropping columns \"commodity\" and \"comm_code\" and removing EU28 and Other Aisa,"
+      "Converting Federal Rep. of Germany to Germany" "Converting Fmr Sudan to Sudan:")
 print(df.info())
+
 
 ##### Oliver - Check if stratified sample already exists
 sample_path = CSV_DIR / "case2_sampled.csv"
