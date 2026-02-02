@@ -1,281 +1,34 @@
 from pandas import read_csv, DataFrame
-import pandas as pd
 import matplotlib.pyplot as plt
-import seaborn as sns
-from sklearn.cluster import KMeans
-from sklearn.preprocessing import StandardScaler
-from sklearn.metrics import pairwise_distances
 from scipy.cluster.hierarchy import dendrogram, linkage
 from sklearn.cluster import AgglomerativeClustering
-from pathlib import Path
 from statsmodels.tsa.holtwinters import ExponentialSmoothing
 from statsmodels.tsa.holtwinters import SimpleExpSmoothing
+from pathlib import Path
 
-##### Oliver Save CSV function
-def save_csv(dataframe: DataFrame, name_of_csv: str):
-    dataframe.to_csv(CSV_DIR / name_of_csv, index=False)
+import dataprep
 
 ##### Oliver - Read CSV
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 CSV_DIR = PROJECT_ROOT / "csv"
 CSV_DIR.mkdir(exist_ok=True)
 
-df = read_csv(CSV_DIR / "case2.csv", sep=";")
-
-print("Initial Dataset:")
-print(df.info())
-
-##### Oliver - Delete all CSVs except case2 and sample on each run
-for file in CSV_DIR.glob("*.csv"):
-    if file.name not in {"case2.csv", "case2_sampled.csv"}:
-        file.unlink()
-
-# Paula - Clean and Remove Columns
-df = df.drop(columns=["commodity", "comm_code"])
-df = df[~df["country_or_area"].isin([
-    "EU-28",
-    "So. African Customs Union",
-    "Other Asia, nes"])]
-df["country_or_area"] = df["country_or_area"].replace(
-    "Fmr Fed. Rep. of Germany", "Germany")
-df["country_or_area"] = df["country_or_area"].replace(
-    "Fmr Sudan", "Sudan")
-
-print("\nDataset after dropping columns \"commodity\" and \"comm_code\" and removing EU28 and Other Aisa,"
-      "Converting Federal Rep. of Germany to Germany" "Converting Fmr Sudan to Sudan:")
-print(df.info())
+##### Oliver Save CSV function
+def save_csv(dataframe: DataFrame, name_of_csv: str):
+    dataframe.to_csv(CSV_DIR / name_of_csv, index=False)
 
 
-##### Oliver - Check if stratified sample already exists
-sample_path = CSV_DIR / "case2_sampled.csv"
-if sample_path.exists():
-    df = read_csv(sample_path, sep=",")
-    df = df.reset_index(drop=True)
-else:
-##### Vera - Stratified Sampling of Countries as Classes
-    df = df.groupby('country_or_area', group_keys=False).apply(
-        lambda x: x.sample(frac=0.4))
-    df = df.reset_index(drop=True)
-    save_csv(df, "case2_sampled.csv")
+##### Oliver - Run dataprep function and get variables
+dataprep.dataprep()
+df_net = dataprep.df_net
+df_net_ironsteel = dataprep.df_net_ironsteel
+df_net_cereals = dataprep.df_net_cereals
+ironsteel_scaled = dataprep.ironsteel_scaled
+cereals_scaled = dataprep.cereals_scaled
+df_cluster_ironsteel = dataprep.df_cluster_ironsteel
+df_cluster_cereals = dataprep.df_cluster_cereals
 
-print("\nDataset after stratified sampling of countries as classes:")
-print(df.info())
-
-##### Vera - Find missing values
-df.info()
-print(df.info())
-
-##### Oliver - Aggregate dataframe for country, year, category and flow
-aggregated = (
-    df.groupby(['country_or_area', 'year', 'category', 'flow'])['trade_usd']
-      .sum()
-      .reset_index(name='trade_usd_sum'))
-
-# Pivot flows into columns
-pivot = pd.pivot_table(
-    aggregated,
-    values='trade_usd_sum',
-    index=['country_or_area', 'year', 'category'],
-    columns=['flow'],
-    aggfunc='sum',
-    fill_value=0)
-
-df_net = pivot.reset_index()
-
-###### Oliver - Compute net trade and re_export and re_import ratio
-df_net["net_usd"] = (df_net["Export"] - df_net["Import"]) + (df_net["Re-Export"] - df_net["Re-Import"])
-df_net["net_imports"] = (df_net["Import"] + df_net["Re-Import"])
-df_net["net_exports"] = (df_net["Export"] + df_net["Re-Export"])
-
-df_net["reexport_ratio"] = df_net["Re-Export"] / df_net["net_exports"]
-df_net["reimport_ratio"] = df_net["Re-Import"] / df_net["net_imports"]
-df_net.loc[df_net["net_exports"] == 0, "reexport_ratio"] = 0
-df_net.loc[df_net["net_imports"] == 0, "reimport_ratio"] = 0
-
-# Save
-save_csv(df_net, "net_trade_by_flow.csv")
-
-print("\nNet trade dataset created:")
-print(df_net.info())
-print(df_net.describe())
-
-# Vera: filter df_net for categories cereals and iron&steel:
-df_net_cereals = df_net.loc[df_net['category'] == '10_cereals', :]
-print(df_net_cereals.head())
-
-df_net_ironsteel = df_net.loc[df_net['category'] == '72_iron_and_steel', :]
-print(df_net_ironsteel.head())
-
-# preparation for Clustering of Cereals:
-# Aggregate per country
-df_cluster_cereals = (
-    df_net_cereals
-    .groupby('country_or_area')[['Export','Import','Re-Export', 'Re-Import', 'net_usd',
-                                 'reexport_ratio', 'reimport_ratio']]
-    .mean()
-    .reset_index())
-# Rescale
-scaler_cereals = StandardScaler()
-cereals_scaled = scaler_cereals.fit_transform(
-    df_cluster_cereals[['Export','Import','Re-Export', 'Re-Import', 'net_usd',
-                                 'reexport_ratio', 'reimport_ratio']])
-print("cereals_scaled type:", type(cereals_scaled))
-print("cereals_scaled shape:", cereals_scaled.shape)
-
-# Preparation of Clustering for Iron&Steel:
-# Aggregate per country
-df_cluster_ironsteel = (
-    df_net_ironsteel
-    .groupby('country_or_area')[['Export','Import','Re-Export', 'Re-Import', 'net_usd',
-                                 'reexport_ratio', 'reimport_ratio']]
-    .mean()
-    .reset_index())
-# Rescale
-scaler_ironsteel = StandardScaler()
-ironsteel_scaled = scaler_ironsteel.fit_transform(
-    df_cluster_ironsteel[['Export','Import','Re-Export', 'Re-Import', 'net_usd',
-                                 'reexport_ratio', 'reimport_ratio']])
-print("Iron&Steel_scaled type:", type(ironsteel_scaled))
-print("Iron&Steel_scaled shape:", ironsteel_scaled.shape)
-
-
-#Thao & Vera: K-Means
-
-# K-Means for Cereals:
-
-# Elbow method
-inertia = []
-for k in range(1, 11):
-    kmeans = KMeans(n_clusters=k, random_state=42, n_init=10)
-    kmeans.fit(cereals_scaled)
-    inertia.append(kmeans.inertia_)
-
-plt.figure(figsize=(8, 5))
-plt.plot(range(1, 11), inertia, marker='o')
-plt.xlabel('Number of clusters (k)')
-plt.ylabel('Inertia')
-plt.title('Optimal k for Cereals')
-plt.grid(True)
-plt.show()
-
-# Final K-Means (k = 7)
-kmeans = KMeans(n_clusters=7, random_state=42, n_init=10)
-df_cluster_cereals['cluster'] = kmeans.fit_predict(cereals_scaled)
-
-# Cluster centroids in ORIGINAL units
-centroids = pd.DataFrame(
-    scaler_cereals.inverse_transform(kmeans.cluster_centers_),
-    columns=['Export','Import','Re-Export', 'Re-Import', 'net_usd',
-                                 'reexport_ratio', 'reimport_ratio'])
-
-print("Cluster centroids (original scale):")
-print(centroids)
-
-# Euclidean distances between cluster centers (scaled space)
-Euclidean = pd.DataFrame(
-    pairwise_distances(kmeans.cluster_centers_, metric='euclidean'))
-
-print("Euclidean distances between clusters:")
-print(Euclidean)
-
-# Cluster summary (same as centroids but easier to explain)
-cluster_summary = (
-    df_cluster_cereals
-    .groupby('cluster')[['Export','Import','Re-Export', 'Re-Import', 'net_usd',
-                                 'reexport_ratio', 'reimport_ratio']]
-    .mean())
-
-print(cluster_summary)
-
-# 2D Visualization
-plt.figure(figsize=(10, 6))
-sns.scatterplot(
-    data=df_cluster_cereals,
-    x='Import',
-    y='Export',
-    hue='cluster',
-    palette='Set2')
-plt.title('K-Means Clustering of Countries by Trade for Cereals')
-plt.xlabel('Imports')
-plt.ylabel('Exports')
-plt.grid(True)
-plt.show()
-
-# Merge clusters back to df_net
-df_net = df_net.merge(
-    df_cluster_cereals[['country_or_area', 'cluster']],
-    on='country_or_area',
-    how='left')
-
-
-#K-Means for Iron&Steel
-
-# Elbow method
-inertia = []
-for k in range(1, 11):
-    kmeans = KMeans(n_clusters=k, random_state=42, n_init=10)
-    kmeans.fit(ironsteel_scaled)
-    inertia.append(kmeans.inertia_)
-
-plt.figure(figsize=(8, 5))
-plt.plot(range(1, 11), inertia, marker='o')
-plt.xlabel('Number of clusters (k)')
-plt.ylabel('Inertia')
-plt.title('Optimal k for Iron&Steel')
-plt.grid(True)
-plt.show()
-
-# Final K-Means (k = 7)
-kmeans = KMeans(n_clusters=7, random_state=42, n_init=10)
-df_cluster_ironsteel['cluster'] = kmeans.fit_predict(ironsteel_scaled)
-
-# Cluster centroids in ORIGINAL units
-centroids = pd.DataFrame(
-    scaler_ironsteel.inverse_transform(kmeans.cluster_centers_),
-    columns=['Export','Import','Re-Export', 'Re-Import', 'net_usd',
-                                 'reexport_ratio', 'reimport_ratio'])
-
-print("Cluster centroids (original scale):")
-print(centroids)
-
-# Euclidean distances between cluster centers (scaled space)
-Euclidean = pd.DataFrame(
-    pairwise_distances(kmeans.cluster_centers_, metric='euclidean'))
-
-print("Euclidean distances between clusters:")
-print(Euclidean)
-
-# Cluster summary (same as centroids but easier to explain)
-cluster_summary = (
-    df_cluster_ironsteel
-    .groupby('cluster')[['Export','Import','Re-Export', 'Re-Import', 'net_usd',
-                                 'reexport_ratio', 'reimport_ratio']]
-    .mean())
-
-print(cluster_summary)
-
-# 2D Visualization
-plt.figure(figsize=(10, 6))
-sns.scatterplot(
-    data=df_cluster_ironsteel,
-    x='Import',
-    y='Export',
-    hue='cluster',
-    palette='Set2')
-plt.title('K-Means Clustering of Countries by Trade for Iron&Steel')
-plt.xlabel('Imports')
-plt.ylabel('Exports')
-plt.grid(True)
-plt.show()
-
-# Merge clusters back to df_net
-df_net = df_net.merge(
-    df_cluster_ironsteel[['country_or_area', 'cluster']],
-    on='country_or_area',
-    how='left')
-
-
-#Thao & Vera: Hierarchical Clustering: Agglomerative
+##### Thao & Vera: Hierarchical Clustering: Agglomerative
 
 # Agglomerative Clustering for Iron&Steel:
 
@@ -518,6 +271,7 @@ c0_ironsteel_data = (
         cluster_ts_ironsteel["cluster_agglomerative_ironsteel"] == 0]
     .sort_values("year")
     .set_index("year"))
+
 h = 5
 ts_ntb = c0_ironsteel_data["net_usd"] / (c0_ironsteel_data["Export"] + c0_ironsteel_data["Import"] + 1e-6)
 ts_ntb = ts_ntb.sort_index()
