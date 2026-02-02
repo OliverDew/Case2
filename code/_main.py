@@ -355,7 +355,7 @@ cereals_profile_scaled = plot_cluster_profile_heatmap_scaled_means(
 )
 
 print("\nCereals – stats:\n")
-print(df_cluster_cereals.describe().tostring())
+print(df_cluster_cereals.describe().to_string())
 
 ##### Thao & Vera
 
