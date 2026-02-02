@@ -7,8 +7,6 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import pairwise_distances
 from scipy.cluster.hierarchy import dendrogram, linkage
 from sklearn.cluster import AgglomerativeClustering
-from tslearn.utils import to_time_series_dataset
-from tslearn.clustering import TimeSeriesKMeans
 from pathlib import Path
 from statsmodels.tsa.holtwinters import ExponentialSmoothing
 from statsmodels.tsa.holtwinters import SimpleExpSmoothing
@@ -207,56 +205,6 @@ df_net = df_net.merge(
     on='country_or_area',
     how='left')
 
-#Time-Series K-Means for cereals:
-
-# Pivot to get time series: rows = countries, columns = years
-ts_data = df_net_cereals.pivot(index='country_or_area', columns='year', values='net_usd').fillna(0)
-
-print(ts_data.head())
-
-scaler_cereals = StandardScaler()
-ts_scaled = scaler_cereals.fit_transform(ts_data)
-
-ts_scaled_3d = to_time_series_dataset(ts_scaled)
-print(ts_scaled_3d.shape)  # (n_countries, n_years, 1)
-
-# Choose number of clusters
-n_clusters = 7
-
-km = TimeSeriesKMeans(n_clusters=n_clusters, metric="dtw", max_iter=50, random_state=42)
-labels = km.fit_predict(ts_scaled_3d)
-
-# Add cluster labels back to dataframe
-ts_data['cluster_ts'] = labels
-print(ts_data[['cluster_ts']])
-
-plt.figure(figsize=(12,6))
-
-for c in range(n_clusters):
-    cluster_members = ts_data[ts_data['cluster_ts'] == c].drop(columns='cluster_ts')
-    for country in cluster_members.index:
-        plt.plot(cluster_members.columns, cluster_members.loc[country], alpha=0.5)
-    plt.plot(cluster_members.columns, cluster_members.mean(), linewidth=3, label=f'Cluster {c} Mean')
-
-plt.title(f'Time-Series Clustering of Countries - {'10_cereals'}')
-plt.xlabel('Year')
-plt.ylabel('Net Trade (scaled)')
-plt.legend()
-plt.show()
-
-for c in range(n_clusters):
-    cluster_countries = ts_data[ts_data['cluster_ts'] == c].index.tolist()
-    print(f"\nCluster {c}:")
-    print(cluster_countries)
-
-df_net = df_net.merge(
-    ts_data['cluster_ts'].reset_index(),
-    left_on='country_or_area',
-    right_on='country_or_area',
-    how='left')
-
-print(df_net[['country_or_area', 'cluster_ts']].drop_duplicates())
-
 
 #K-Means for Iron&Steel
 
@@ -325,71 +273,7 @@ df_net = df_net.merge(
     how='left')
 
 
-# Time Series K Means for Iron&Steel
-
-# Pivot to time-series format
-ts_data = df_net_ironsteel.pivot(index='country_or_area', columns='year', values='net_usd').fillna(0)
-
-# Scale each country's series
-scaler_ironsteel = StandardScaler()
-ts_scaled = scaler_ironsteel.fit_transform(ts_data)
-
-# Convert to tslearn 3D format
-ts_scaled_3d = to_time_series_dataset(ts_scaled)
-
-# Time-Series K-Means clustering
-n_clusters = 7
-km = TimeSeriesKMeans(n_clusters=n_clusters, metric="dtw", max_iter=50, random_state=42)
-labels = km.fit_predict(ts_scaled_3d)
-
-# Add cluster labels back to pivoted dataframe
-ts_data['cluster_ts'] = labels
-
-# Plot clusters
-plt.figure(figsize=(12,6))
-for c in range(n_clusters):
-    cluster_members = ts_data[ts_data['cluster_ts'] == c].drop(columns='cluster_ts')
-    for country in cluster_members.index:
-        plt.plot(cluster_members.columns, cluster_members.loc[country], alpha=0.5)
-    plt.plot(cluster_members.columns, cluster_members.mean(), linewidth=3, label=f'Cluster {c} Mean')
-
-plt.title(f'Time-Series Clustering of Countries - {'72_iron_and_steel'}')
-plt.xlabel('Year')
-plt.ylabel('Net Trade (scaled)')
-plt.legend()
-plt.show()
-
-# Print countries per cluster
-for c in range(n_clusters):
-    cluster_countries = ts_data[ts_data['cluster_ts'] == c].index.tolist()
-    print(f"Cluster {c}:")
-    print(cluster_countries)
-
-# Merge cluster labels back to main df_net
-df_net = df_net.merge(
-    ts_data['cluster_ts'].reset_index().rename(columns={'cluster_ts':'cluster_ts_iron_steel'}),
-    left_on='country_or_area',
-    right_on='country_or_area',
-    how='left')
-
-print(df_net[['country_or_area','cluster_ts_iron_steel']].drop_duplicates())
-
-#List countries by clusters
-for c in range(n_clusters):
-    cluster_members = ts_data[ts_data['cluster_ts'] == c].drop(columns='cluster_ts')
-    for country in cluster_members.index:
-        plt.plot(cluster_members.columns, cluster_members.loc[country], alpha=0.5)
-
-plt.title(f'Time-Series Clustering of Countries - {'72_iron_and_steel'}')
-plt.xlabel('Year')
-plt.ylabel('Net Trade (scaled)')
-plt.show()
-
-cluster_summary = ts_data.groupby('cluster_ts').apply(lambda x: list(x.index))
-print(cluster_summary)
-
-
-#Hierarchical Clustering: Agglomerative
+#Thao & Vera: Hierarchical Clustering: Agglomerative
 
 # Agglomerative Clustering for Iron&Steel:
 
@@ -426,20 +310,6 @@ agglomerative_summary = (
 
 print(agglomerative_summary)
 
-plt.figure(figsize=(10, 6))
-sns.scatterplot(
-    data=df_cluster_ironsteel,
-    x='Import',
-    y='Export',
-    hue='cluster_agglomerative_ironsteel',
-    palette='Set1')
-
-plt.title('Hierarchical Clustering for Iron&Steel')
-plt.xlabel('Import')
-plt.ylabel('Export')
-plt.grid(True)
-plt.show()
-
 # add the clusters as a column to the iron&steel dataset:
 df_net_ironsteel = df_net_ironsteel.merge(
     df_cluster_ironsteel[['country_or_area', 'cluster_agglomerative_ironsteel']],
@@ -464,8 +334,7 @@ for cluster, countries in clusters_ironsteel.items():
 # sort Data by year:
 df_net_ironsteel = df_net_ironsteel.sort_values("year")
 
-# Aggregate: one time series per cluster
-# Because each cluster contains many countries, aggregate within each cluster at each time step
+# Aggregate one time series per cluster, aggregate within each cluster at each time step
 # most common: aggregate with the mean
 cluster_ts_ironsteel = (
     df_net_ironsteel
@@ -570,20 +439,6 @@ agglomerative_summary = (
 
 print(agglomerative_summary)
 
-plt.figure(figsize=(10, 6))
-sns.scatterplot(
-    data=df_cluster_cereals,
-    x='Import',
-    y='Export',
-    hue='cluster_agglomerative_cereals',
-    palette='Set1')
-
-plt.title('Hierarchical Clustering for Cereals')
-plt.xlabel('Import')
-plt.ylabel('Export')
-plt.grid(True)
-plt.show()
-
 # add the clusters as a column to the cereals dataset:
 df_net_cereals = df_net_cereals.merge(
     df_cluster_cereals[['country_or_area', 'cluster_agglomerative_cereals']],
@@ -617,7 +472,6 @@ save_csv(cluster_ts_cereals, "cluster_ts_cereals.csv")
 # this dataset gives us the time series data for each cluster in cereals
 
 # plot time series for each cluster
-
 clusters_cereals = sorted(
     cluster_ts_cereals["cluster_agglomerative_cereals"].unique())
 
