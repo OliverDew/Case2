@@ -1,7 +1,6 @@
 from pandas import read_csv, DataFrame
 import pandas as pd
 import matplotlib.pyplot as plt
-import matplotlib.ticker as ticker
 import seaborn as sns
 from sklearn.cluster import KMeans
 from sklearn.preprocessing import StandardScaler
@@ -10,7 +9,6 @@ from scipy.cluster.hierarchy import dendrogram, linkage
 from sklearn.cluster import AgglomerativeClustering
 from tslearn.utils import to_time_series_dataset
 from tslearn.clustering import TimeSeriesKMeans
-from sklearn import preprocessing
 from pathlib import Path
 from statsmodels.tsa.holtwinters import ExponentialSmoothing
 from statsmodels.tsa.holtwinters import SimpleExpSmoothing
@@ -32,11 +30,10 @@ print("Initial Dataset:")
 print(df.info())
 
 
-##### Oliver - Delete all CSVs except case2 on each run
+##### Oliver - Delete all CSVs except case2 and sample on each run
 for file in CSV_DIR.glob("*.csv"):
     if file.name not in {"case2.csv", "case2_sampled.csv"}:
         file.unlink()
-
 
 ##### Paula - Clean & Remove Columns (Remove EU28, Convert Federal Rep. of Germany to Germany)
 df = df.drop(columns=["commodity", "comm_code"])
@@ -49,10 +46,8 @@ df["country_or_area"] = df["country_or_area"].replace(
 print("\nDataset after dropping columns \"commodity\" and \"comm_code\" and removing EU28, Converting Federal Rep. of Germany to Germany:")
 print(df.info())
 
-
 ##### Oliver - Check if stratified sample already exists
 sample_path = CSV_DIR / "case2_sampled.csv"
-
 if sample_path.exists():
     df = read_csv(sample_path, sep=",")
     df = df.reset_index(drop=True)
@@ -69,10 +64,8 @@ print(df.info())
 ##### Vera - Find missing values
 df.info()
 print(df.info())
-# -> missing values only in weight_kg column; we do not use that, so no need to deal with the missing values
 
 ##### Oliver - Aggregate dataframe for country, year, category and flow
-
 aggregated = (
     df.groupby(['country_or_area', 'year', 'category', 'flow'])['trade_usd']
       .sum()
@@ -105,7 +98,6 @@ save_csv(df_net, "net_trade_by_flow.csv")
 print("\nNet trade dataset created:")
 print(df_net.info())
 print(df_net.describe())
-
 
 # Vera: filter df_net for categories cereals and iron&steel:
 df_net_cereals = df_net.loc[df_net['category'] == '10_cereals', :]
@@ -147,8 +139,7 @@ print("Iron&Steel_scaled type:", type(ironsteel_scaled))
 print("Iron&Steel_scaled shape:", ironsteel_scaled.shape)
 
 
-#Thao: K-Means
-#Vera: differentiate between categories, adjusting features and k
+#Thao & Vera: K-Means
 
 # K-Means for Cereals:
 
@@ -860,8 +851,8 @@ c1_cereals_data = (
     cluster_ts_cereals[
         cluster_ts_cereals["cluster_agglomerative_cereals"] == 1]
     .sort_values("year")
-    .set_index("year")
-)
+    .set_index("year"))
+
 h = 5
 plt.figure(figsize=(12, 6))
 for feature in level_features:
