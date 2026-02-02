@@ -1,75 +1,91 @@
-from pandas import read_csv
+from pandas import read_csv, DataFrame
 import pandas as pd
-import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
 import seaborn as sns
-
+import matplotlib.pyplot as plt
+from pathlib import Path
 
 ##### Oliver - Read CSV
-df = read_csv("../csv/case2.csv", sep=";")
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+CSV_DIR = PROJECT_ROOT / "csv"
+CSV_DIR.mkdir(exist_ok=True)
+
+df = read_csv(CSV_DIR / "case2.csv", sep=";")
 
 print("Initial Dataset:")
 print(df.info())
 
+##### Oliver - Helpers
+# Save CSV function
+def save_csv(dataframe: DataFrame, name_of_csv: str):
+    dataframe.to_csv(CSV_DIR / name_of_csv, index=False)
 
-##### Paula - Clean & Remove Columns (Remove EU28, Convert Federal Rep. of Germany to Germany)
+##### Oliver - Delete all CSVs except case2 + sample on each run
+for file in CSV_DIR.glob("*.csv"):
+    if file.name not in {"case2.csv", "case2_sampled.csv"}:
+        file.unlink()
+
+# Paula - Clean and Remove Columns
 df = df.drop(columns=["commodity", "comm_code"])
 df = df[~df["country_or_area"].isin([
     "EU-28",
-    "So. African Customs Union"])]
+    "So. African Customs Union",
+    "Other Asia, nes"])]
 df["country_or_area"] = df["country_or_area"].replace(
     "Fmr Fed. Rep. of Germany", "Germany")
+df["country_or_area"] = df["country_or_area"].replace(
+    "Fmr Sudan", "Sudan")
 
-print("\nDataset after dropping columns \"commodity\" and \"comm_code\" and removing EU28, Converting Federal Rep. of Germany to Germany:")
+print("\nDataset after dropping columns \"commodity\" and \"comm_code\" and removing EU28 and Other Aisa,"
+      "Converting Federal Rep. of Germany to Germany" "Converting Fmr Sudan to Sudan:")
 print(df.info())
 
 
+##### Oliver - Check if stratified sample already exists
+sample_path = CSV_DIR / "case2_sampled.csv"
+if sample_path.exists():
+    df = read_csv(sample_path, sep=",")
+    df = df.reset_index(drop=True)
+else:
 ##### Vera - Stratified Sampling of Countries as Classes
-df = df.groupby('country_or_area', group_keys=False).apply(
-    lambda x: x.sample(frac=0.4))
-df = df.reset_index(drop=True)
-df.to_csv("case2_sampled.csv", index=False)
+    df = df.groupby('country_or_area', group_keys=False).apply(
+        lambda x: x.sample(frac=0.4))
+    df = df.reset_index(drop=True)
+    save_csv(df, "case2_sampled.csv")
 
 print("\nDataset after stratified sampling of countries as classes:")
 print(df.info())
 
-##### Vera - Deal with missing values in weight category
-df['weight_kg'] = df['weight_kg'].fillna(df['weight_kg'].median())
-
-print("\nDataset after dealing with missing values in weight category:")
+##### Vera - Find missing values
+df.info()
 print(df.info())
 
-##### Vera - Create Dummy Variables for Category & Flow
-df_dummy = (pd.get_dummies(df, columns = ['category', 'flow'], prefix_sep='_', dummy_na=False, dtype='int'))
-df_dummy.to_csv("dummy.csv", index=False)
-print("\nDataset after creating dummy variables for category & flow:")
-print(df_dummy.info())
-
-
-##### Oliver - Create net (import, export, reimport, reexport) values (4) for each year, country and category
-
+##### Oliver - Aggregate dataframe for country, year, category and flow
 aggregated = (
-    df.groupby(['country_or_area', 'year', 'category', 'flow'], as_index=False)
-      .agg(trade_usd_sum=('trade_usd', 'sum'))
-)
+    df.groupby(['country_or_area', 'year', 'category', 'flow'])['trade_usd']
+      .sum()
+      .reset_index(name='trade_usd_sum'))
 
 # Pivot flows into columns
-pivot = aggregated.pivot_table(
-    index=['country_or_area', 'year', 'category'],
-    columns='flow',
+pivot = pd.pivot_table(
+    aggregated,
     values='trade_usd_sum',
-    fill_value=0
-)
+    index=['country_or_area', 'year', 'category'],
+    columns=['flow'],
+    aggfunc='sum',
+    fill_value=0)
 
 df_net = pivot.reset_index()
 
-# Compute net trade
+###### Oliver - Compute net trade and re_export and re_import ratio
 df_net["net_usd"] = (df_net["Export"] - df_net["Import"]) + (df_net["Re-Export"] - df_net["Re-Import"])
 df_net["net_imports"] = (df_net["Import"] + df_net["Re-Import"])
-df_net["net_export"] = (df_net["Export"] + df_net["Re-Export"])
+df_net["net_exports"] = (df_net["Export"] + df_net["Re-Export"])
 
-# Save
-df_net.to_csv("case2_net_trade_by_flow.csv", index=False)
+df_net["reexport_ratio"] = df_net["Re-Export"] / df_net["net_exports"]
+df_net["reimport_ratio"] = df_net["Re-Import"] / df_net["net_imports"]
+df_net.loc[df_net["net_exports"] == 0, "reexport_ratio"] = 0
+df_net.loc[df_net["net_imports"] == 0, "reimport_ratio"] = 0
 
 print("\nNet trade dataset created:")
 print(df_net.info())
@@ -135,7 +151,7 @@ plt.ylabel('net_usd')
 
 # Vera: Scatter Plot by Category
 fig, ax = plt.subplots(figsize=(10, 6))
-sns.scatterplot(x='net_imports', y='net_export', hue='country_or_area', data=df_net)
+sns.scatterplot(x='net_imports', y='net_exports', hue='country_or_area', data=df_net)
 plt.title('Imports vs. Exports Colored by Country')
 plt.xlabel('net_imports')
 plt.ylabel('net_export')
