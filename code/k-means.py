@@ -78,12 +78,6 @@ plt.ylabel('Exports')
 plt.grid(True)
 plt.show()
 
-# Merge clusters back to df_net
-df_net = df_net.merge(
-    df_cluster_cereals[['country_or_area', 'cluster']],
-    on='country_or_area',
-    how='left')
-
 
 #K-Means for Iron&Steel
 
@@ -144,9 +138,3 @@ plt.xlabel('Imports')
 plt.ylabel('Exports')
 plt.grid(True)
 plt.show()
-
-# Merge clusters back to df_net
-df_net = df_net.merge(
-    df_cluster_ironsteel[['country_or_area', 'cluster']],
-    on='country_or_area',
-    how='left')

@@ -1,7 +1,11 @@
 from pandas import read_csv, DataFrame
+import pandas as pd
+import numpy as np
+import seaborn as sns
 import matplotlib.pyplot as plt
 from scipy.cluster.hierarchy import dendrogram, linkage
 from sklearn.cluster import AgglomerativeClustering
+from sklearn.preprocessing import StandardScaler
 from statsmodels.tsa.holtwinters import ExponentialSmoothing
 from statsmodels.tsa.holtwinters import SimpleExpSmoothing
 from pathlib import Path
@@ -13,20 +17,165 @@ PROJECT_ROOT = Path(__file__).resolve().parent.parent
 CSV_DIR = PROJECT_ROOT / "csv"
 CSV_DIR.mkdir(exist_ok=True)
 
-##### Oliver Save CSV function
+df = read_csv(CSV_DIR / "case2.csv", sep=";")
+
+print("Initial Dataset:")
+print(df.info())
+
+##### Oliver - Helpers
+# Save CSV function
 def save_csv(dataframe: DataFrame, name_of_csv: str):
     dataframe.to_csv(CSV_DIR / name_of_csv, index=False)
 
+# Heatmap helper
+def plot_cluster_profile_heatmap_scaled_means(
+    df_cluster: pd.DataFrame,
+    scaled: np.ndarray,
+    cluster_col: str,
+    feature_cols: list[str],
+    title: str,
+    sort_clusters: bool = True,
+):
+    """
+    Heatmap with rows=clusters and cols=features.
+    Values are cluster means in *scaled space* (z-scores).
+    """
 
-##### Oliver - Run dataprep function and get variables
-dataprep.dataprep()
-df_net = dataprep.df_net
-df_net_ironsteel = dataprep.df_net_ironsteel
-df_net_cereals = dataprep.df_net_cereals
-ironsteel_scaled = dataprep.ironsteel_scaled
-cereals_scaled = dataprep.cereals_scaled
-df_cluster_ironsteel = dataprep.df_cluster_ironsteel
-df_cluster_cereals = dataprep.df_cluster_cereals
+    # build scaled dataframe per country
+    X = pd.DataFrame(
+        scaled,
+        columns=feature_cols
+    )
+    X[cluster_col] = df_cluster[cluster_col].to_numpy()
+
+    # cluster means in scaled space
+    profile = X.groupby(cluster_col)[feature_cols].mean()
+
+    if sort_clusters:
+        profile = profile.sort_index()
+
+    plt.figure(figsize=(9, 3 + 0.6 * len(profile)))
+    sns.heatmap(profile, cmap="mako_r", center=0, annot=True, fmt=".2f")
+    plt.title(title)
+    plt.xlabel("Features (scaled mean)")
+    plt.ylabel("Cluster")
+    plt.tight_layout()
+    plt.show()
+
+    return profile
+
+##### Oliver - Delete all CSVs except case2 + sample on each run
+for file in CSV_DIR.glob("*.csv"):
+    if file.name not in {"case2.csv", "case2_sampled.csv"}:
+        file.unlink()
+
+# Paula - Clean and Remove Columns
+df = df.drop(columns=["commodity", "comm_code"])
+df = df[~df["country_or_area"].isin([
+    "EU-28",
+    "So. African Customs Union",
+    "Other Asia, nes"])]
+df["country_or_area"] = df["country_or_area"].replace(
+    "Fmr Fed. Rep. of Germany", "Germany")
+df["country_or_area"] = df["country_or_area"].replace(
+    "Fmr Sudan", "Sudan")
+
+print("\nDataset after dropping columns \"commodity\" and \"comm_code\" and removing EU28 and Other Aisa,"
+      "Converting Federal Rep. of Germany to Germany" "Converting Fmr Sudan to Sudan:")
+print(df.info())
+
+
+##### Oliver - Check if stratified sample already exists
+sample_path = CSV_DIR / "case2_sampled.csv"
+if sample_path.exists():
+    df = read_csv(sample_path, sep=",")
+    df = df.reset_index(drop=True)
+else:
+##### Vera - Stratified Sampling of Countries as Classes
+    df = df.groupby('country_or_area', group_keys=False).apply(
+        lambda x: x.sample(frac=0.4))
+    df = df.reset_index(drop=True)
+    save_csv(df, "case2_sampled.csv")
+
+print("\nDataset after stratified sampling of countries as classes:")
+print(df.info())
+
+##### Vera - Find missing values
+df.info()
+print(df.info())
+
+##### Oliver - Aggregate dataframe for country, year, category and flow
+aggregated = (
+    df.groupby(['country_or_area', 'year', 'category', 'flow'])['trade_usd']
+      .sum()
+      .reset_index(name='trade_usd_sum'))
+
+# Pivot flows into columns
+pivot = pd.pivot_table(
+    aggregated,
+    values='trade_usd_sum',
+    index=['country_or_area', 'year', 'category'],
+    columns=['flow'],
+    aggfunc='sum',
+    fill_value=0)
+
+df_net = pivot.reset_index()
+
+###### Oliver - Compute net trade and re_export and re_import ratio
+df_net["net_usd"] = (df_net["Export"] - df_net["Import"]) + (df_net["Re-Export"] - df_net["Re-Import"])
+df_net["net_imports"] = (df_net["Import"] + df_net["Re-Import"])
+df_net["net_exports"] = (df_net["Export"] + df_net["Re-Export"])
+
+df_net["reexport_ratio"] = df_net["Re-Export"] / df_net["net_exports"]
+df_net["reimport_ratio"] = df_net["Re-Import"] / df_net["net_imports"]
+df_net.loc[df_net["net_exports"] == 0, "reexport_ratio"] = 0
+df_net.loc[df_net["net_imports"] == 0, "reimport_ratio"] = 0
+
+# Save
+save_csv(df_net, "net_trade_by_flow.csv")
+
+print("\nNet trade dataset created:")
+print(df_net.info())
+print(df_net.describe())
+
+##### Vera: filter df_net for categories cereals and iron&steel:
+df_net_cereals = df_net.loc[df_net['category'] == '10_cereals', :]
+print(df_net_cereals.head())
+
+df_net_ironsteel = df_net.loc[df_net['category'] == '72_iron_and_steel', :]
+print(df_net_ironsteel.head())
+
+# preparation for Clustering of Cereals:
+# Aggregate per country
+df_cluster_cereals = (
+    df_net_cereals
+    .groupby('country_or_area')[['Export','Import','Re-Export', 'Re-Import', 'net_usd',
+                                 'reexport_ratio', 'reimport_ratio']]
+    .mean()
+    .reset_index())
+# Rescale
+scaler_cereals = StandardScaler()
+cereals_scaled = scaler_cereals.fit_transform(
+    df_cluster_cereals[['Export','Import','Re-Export', 'Re-Import', 'net_usd',
+                                 'reexport_ratio', 'reimport_ratio']])
+print("cereals_scaled type:", type(cereals_scaled))
+print("cereals_scaled shape:", cereals_scaled.shape)
+
+# Preparation of Clustering for Iron&Steel:
+# Aggregate per country
+df_cluster_ironsteel = (
+    df_net_ironsteel
+    .groupby('country_or_area')[['Export','Import','Re-Export', 'Re-Import', 'net_usd',
+                                 'reexport_ratio', 'reimport_ratio']]
+    .mean()
+    .reset_index())
+# Rescale
+scaler_ironsteel = StandardScaler()
+ironsteel_scaled = scaler_ironsteel.fit_transform(
+    df_cluster_ironsteel[['Export','Import','Re-Export', 'Re-Import', 'net_usd',
+                                 'reexport_ratio', 'reimport_ratio']])
+print("Iron&Steel_scaled type:", type(ironsteel_scaled))
+print("Iron&Steel_scaled shape:", ironsteel_scaled.shape)
 
 ##### Thao & Vera: Hierarchical Clustering: Agglomerative
 
@@ -57,10 +206,27 @@ df_cluster_ironsteel['cluster_agglomerative_ironsteel'] = agg.fit_predict(ironst
 
 print(df_cluster_ironsteel.head())
 
+##### Oliver - Cluster Validity
+
+ironsteel_features = ['Export','Import','Re-Export', 'Re-Import', 'net_usd',
+                      'reexport_ratio', 'reimport_ratio']
+
+iron_profile_scaled = plot_cluster_profile_heatmap_scaled_means(
+    df_cluster=df_cluster_ironsteel,
+    scaled=ironsteel_scaled,
+    cluster_col="cluster_agglomerative_ironsteel",
+    feature_cols=ironsteel_features,
+    title="Iron & Steel – Cluster Profiles (Scaled Feature Means)"
+)
+
+print("\nIron & Steel – stats:\n")
+print(df_cluster_ironsteel.describe().to_string())
+
+##### Thao & Vera
+
 agglomerative_summary = (
     df_cluster_ironsteel
-    .groupby('cluster_agglomerative_ironsteel')[['Export','Import','Re-Export', 'Re-Import', 'net_usd',
-                                 'reexport_ratio', 'reimport_ratio']]
+    .groupby('cluster_agglomerative_ironsteel')[ironsteel_features]
     .mean())
 
 print(agglomerative_summary)
@@ -83,6 +249,7 @@ for cluster, countries in clusters_ironsteel.items():
     for c in countries:
         print(f"  - {c}")
     print()
+
 
 # Time Series for Iron&Steel
 
@@ -174,6 +341,24 @@ df_cluster_cereals['cluster_agglomerative_cereals'] = agg.fit_predict(cereals_sc
 
 print(df_cluster_cereals)
 
+##### Oliver - Cluster Validity
+
+cereals_features = ['Export','Import','Re-Export', 'Re-Import', 'net_usd',
+                    'reexport_ratio', 'reimport_ratio']
+
+cereals_profile_scaled = plot_cluster_profile_heatmap_scaled_means(
+    df_cluster=df_cluster_cereals,
+    scaled=cereals_scaled,
+    cluster_col="cluster_agglomerative_cereals",
+    feature_cols=cereals_features,
+    title="Cereals – Cluster Profiles (Scaled Feature Means)"
+)
+
+print("\nCereals – stats:\n")
+print(df_cluster_cereals.describe().tostring())
+
+##### Thao & Vera
+
 # list of clusters:
 clusters_cereals = (
     df_cluster_cereals
@@ -188,8 +373,7 @@ for cluster, countries in clusters_cereals.items():
 
 agglomerative_summary = (
     df_cluster_cereals
-    .groupby('cluster_agglomerative_cereals')[['Export','Import','Re-Export', 'Re-Import', 'net_usd',
-                                 'reexport_ratio', 'reimport_ratio']]
+    .groupby('cluster_agglomerative_cereals')[cereals_features]
     .mean()).apply(list)
 
 print(agglomerative_summary)
