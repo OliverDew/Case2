@@ -10,7 +10,10 @@ from statsmodels.tsa.holtwinters import ExponentialSmoothing
 from statsmodels.tsa.holtwinters import SimpleExpSmoothing
 from pathlib import Path
 
-import dataprep
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import adjusted_rand_score
+from scipy.optimize import linear_sum_assignment
+from sklearn.metrics import confusion_matrix
 
 ##### Oliver - Read CSV
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
@@ -22,13 +25,14 @@ df = read_csv(CSV_DIR / "case2.csv", sep=";")
 print("Initial Dataset:")
 print(df.info())
 
+
 ##### Oliver - Helpers
 # Save CSV function
 def save_csv(dataframe: DataFrame, name_of_csv: str):
     dataframe.to_csv(CSV_DIR / name_of_csv, index=False)
 
 # Heatmap helper
-def plot_cluster_profile_heatmap_scaled_means(
+def plot_heatmap(
     df_cluster: pd.DataFrame,
     scaled: np.ndarray,
     cluster_col: str,
@@ -38,7 +42,7 @@ def plot_cluster_profile_heatmap_scaled_means(
 ):
     """
     Heatmap with rows=clusters and cols=features.
-    Values are cluster means in *scaled space* (z-scores).
+    Values are z-score cluster means
     """
 
     # build scaled dataframe per country
@@ -62,14 +66,118 @@ def plot_cluster_profile_heatmap_scaled_means(
     plt.tight_layout()
     plt.show()
 
-    return profile
+# Helpers for testing the cluster stability
+def _nearest_centroid_assign(X_B: np.ndarray, centroids: np.ndarray) -> np.ndarray:
+    """
+    Assign each row in X_B to the nearest centroid (Euclidean distance).
+    Returns labels in [0..k-1] corresponding to centroid index.
+    """
+    # distances: shape (n_B, k)
+    dists = np.linalg.norm(X_B[:, None, :] - centroids[None, :, :], axis=2)
+    return dists.argmin(axis=1)
+
+
+def _hungarian_cluster_accuracy(y_true: np.ndarray, y_pred: np.ndarray) -> float:
+    """
+    Cluster labels are arbitrary. This finds the best 1-1 mapping between y_pred and y_true
+    using the Hungarian algorithm, then returns accuracy.
+    """
+    cm = confusion_matrix(y_true, y_pred)
+    # maximize matches => minimize negative matches
+    row_ind, col_ind = linear_sum_assignment(-cm)
+    matched = cm[row_ind, col_ind].sum()
+    return matched / cm.sum()
+
+
+def cluster_stability_one_split(
+    X_scaled: np.ndarray,
+    n_clusters: int = 3,
+    linkage: str = "ward",
+    test_size: float = 0.5,
+    random_state: int = 42,
+):
+    """
+    Implements the screenshot:
+    1) split into A/B
+    2) cluster A (hierarchical)
+    3) compute A centroids and assign B to nearest centroid
+    4) cluster FULL data
+    5) compare labels for B: assigned-from-A vs full-cluster labels
+
+    Returns:
+      - ARI on B (permutation-invariant, recommended)
+      - best-mapped accuracy on B (interpretability)
+    """
+    n = X_scaled.shape[0]
+    idx_all = np.arange(n)
+
+    idx_A, idx_B = train_test_split(
+        idx_all, test_size=test_size, random_state=random_state, shuffle=True
+    )
+
+    X_A = X_scaled[idx_A]
+    X_B = X_scaled[idx_B]
+
+    # Step 2: cluster A
+    model_A = AgglomerativeClustering(n_clusters=n_clusters, linkage=linkage)
+    labels_A = model_A.fit_predict(X_A)
+
+    # Step 3: centroids from A clusters (in scaled feature space)
+    centroids = np.vstack([X_A[labels_A == k].mean(axis=0) for k in range(n_clusters)])
+
+    # Assign B to nearest centroid
+    labels_B_assigned = _nearest_centroid_assign(X_B, centroids)
+
+    # Step 4: cluster full dataset
+    model_full = AgglomerativeClustering(n_clusters=n_clusters, linkage=linkage)
+    labels_full = model_full.fit_predict(X_scaled)
+
+    # Step 5: compare on B only
+    labels_B_full = labels_full[idx_B]
+
+    ari = adjusted_rand_score(labels_B_full, labels_B_assigned)
+    acc = _hungarian_cluster_accuracy(labels_B_full, labels_B_assigned)
+
+    return ari, acc
+
+
+def cluster_stability_repeated(
+    X_scaled: np.ndarray,
+    n_clusters: int = 3,
+    linkage: str = "ward",
+    test_size: float = 0.5,
+    n_repeats: int = 30,
+    seed: int = 42,
+):
+    """
+    Repeats the split procedure to avoid one lucky/unlucky split.
+    Returns a DataFrame with ARI + best-mapped accuracy per split and prints summary.
+    """
+    results = []
+    for i in range(n_repeats):
+        rs = seed + i
+        ari, acc = cluster_stability_one_split(
+            X_scaled=X_scaled,
+            n_clusters=n_clusters,
+            linkage=linkage,
+            test_size=test_size,
+            random_state=rs,
+        )
+        results.append({"split": i, "ARI_B": ari, "ACC_B_mapped": acc})
+
+    res = pd.DataFrame(results)
+    print("\nCluster stability (repeated splits)")
+    print(res.describe()[["ARI_B", "ACC_B_mapped"]])
+
+    return res
 
 ##### Oliver - Delete all CSVs except case2 + sample on each run
 for file in CSV_DIR.glob("*.csv"):
     if file.name not in {"case2.csv", "case2_sampled.csv"}:
         file.unlink()
 
-# Paula - Clean and Remove Columns
+
+##### Paula - Clean and Remove Columns
 df = df.drop(columns=["commodity", "comm_code"])
 df = df[~df["country_or_area"].isin([
     "EU-28",
@@ -138,6 +246,7 @@ print("\nNet trade dataset created:")
 print(df_net.info())
 print(df_net.describe())
 
+
 ##### Vera: filter df_net for categories cereals and iron&steel:
 df_net_cereals = df_net.loc[df_net['category'] == '10_cereals', :]
 print(df_net_cereals.head())
@@ -177,6 +286,7 @@ ironsteel_scaled = scaler_ironsteel.fit_transform(
 print("Iron&Steel_scaled type:", type(ironsteel_scaled))
 print("Iron&Steel_scaled shape:", ironsteel_scaled.shape)
 
+
 ##### Thao & Vera: Hierarchical Clustering: Agglomerative
 
 # Agglomerative Clustering for Iron&Steel:
@@ -206,12 +316,13 @@ df_cluster_ironsteel['cluster_agglomerative_ironsteel'] = agg.fit_predict(ironst
 
 print(df_cluster_ironsteel.head())
 
-##### Oliver - Cluster Validity
+
+##### Oliver - Cluster Validity (Plotting z-score heatmap & cluster stability)
 
 ironsteel_features = ['Export','Import','Re-Export', 'Re-Import', 'net_usd',
                       'reexport_ratio', 'reimport_ratio']
 
-iron_profile_scaled = plot_cluster_profile_heatmap_scaled_means(
+plot_heatmap(
     df_cluster=df_cluster_ironsteel,
     scaled=ironsteel_scaled,
     cluster_col="cluster_agglomerative_ironsteel",
@@ -219,8 +330,22 @@ iron_profile_scaled = plot_cluster_profile_heatmap_scaled_means(
     title="Iron & Steel – Cluster Profiles (Scaled Feature Means)"
 )
 
-print("\nIron & Steel – stats:\n")
-print(df_cluster_ironsteel.describe().to_string())
+stability_ironsteel = cluster_stability_repeated(
+    X_scaled=ironsteel_scaled,
+    n_clusters=3,
+    linkage="ward",
+    test_size=0.5,
+    n_repeats=50,
+    seed=123
+)
+
+plt.figure(figsize=(8,4))
+plt.hist(stability_ironsteel["ARI_B"], bins=12)
+plt.title("Iron & Steel – Stability distribution (ARI on B)")
+plt.xlabel("ARI (B: assigned-from-A vs full)")
+plt.ylabel("Count")
+plt.tight_layout()
+plt.show()
 
 ##### Thao & Vera
 
@@ -341,12 +466,12 @@ df_cluster_cereals['cluster_agglomerative_cereals'] = agg.fit_predict(cereals_sc
 
 print(df_cluster_cereals)
 
-##### Oliver - Cluster Validity
+##### Oliver - Cluster Validity (Plotting z-score heatmap & cluster stability)
 
 cereals_features = ['Export','Import','Re-Export', 'Re-Import', 'net_usd',
                     'reexport_ratio', 'reimport_ratio']
 
-cereals_profile_scaled = plot_cluster_profile_heatmap_scaled_means(
+plot_heatmap(
     df_cluster=df_cluster_cereals,
     scaled=cereals_scaled,
     cluster_col="cluster_agglomerative_cereals",
@@ -354,8 +479,23 @@ cereals_profile_scaled = plot_cluster_profile_heatmap_scaled_means(
     title="Cereals – Cluster Profiles (Scaled Feature Means)"
 )
 
-print("\nCereals – stats:\n")
-print(df_cluster_cereals.describe().tostring())
+stability_cereals = cluster_stability_repeated(
+    X_scaled=cereals_scaled,
+    n_clusters=3,
+    linkage="ward",
+    test_size=0.5,
+    n_repeats=50,
+    seed=123
+)
+
+plt.figure(figsize=(8,4))
+plt.hist(stability_cereals["ARI_B"], bins=12)
+plt.title("Cereals – Stability distribution (ARI on B)")
+plt.xlabel("ARI (B: assigned-from-A vs full)")
+plt.ylabel("Count")
+plt.tight_layout()
+plt.show()
+
 
 ##### Thao & Vera
 
