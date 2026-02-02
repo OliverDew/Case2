@@ -665,132 +665,100 @@ for c1 in clusters:
 
 # FORECASTING:
 
-#Cluster 0 iron and steel
+#Forecast for Cluster 0 - Iron & Steel
+c0_ironsteel_data = (
+    cluster_ts_ironsteel[
+        cluster_ts_ironsteel["cluster_agglomerative_ironsteel"] == 0]
+    .sort_values("year")
+    .set_index("year"))
+h = 5
+ts_ntb = c0_ironsteel_data["net_usd"] / (c0_ironsteel_data["Export"] + c0_ironsteel_data["Import"] + 1e-6)
+ts_ntb = ts_ntb.sort_index()
+model_ntb = ExponentialSmoothing(
+    ts_ntb, trend="add", damped_trend=True, seasonal=None).fit()
+fc_ntb = model_ntb.forecast(h)
+last_year = ts_ntb.index.max()
+fc_ntb.index = range(last_year + 1, last_year + h + 1)
 
-# --- 1. PREPARE THE NORMALIZED TIME SERIES ---
-cluster_0_raw = df_net_ironsteel[df_net_ironsteel["cluster_agglomerative_ironsteel"] == 0].copy()
-
-# Calculate Normalized Trade Balance for each country-year
-# We add a small epsilon (1e-6) to avoid division by zero if trade is ever exactly 0
-cluster_0_raw['ntb_ratio'] = (cluster_0_raw['net_usd']) / (cluster_0_raw['Import'] + cluster_0_raw['Export'] + 1e-6)
-
-# Now aggregate the RATIO by year (Mean of ratios)
-ts_ratio = cluster_0_raw.groupby("year")["ntb_ratio"].mean().sort_index()
-ts_ratio.index = ts_ratio.index.astype(int)
-
-# --- 2. FORECAST HORIZON ---
-h = 12
-
-# --- 3. FIT HOLT'S LINEAR MODEL ---
-# Using the ratio series (ts_ratio)
-model = ExponentialSmoothing(
-    ts_ratio,
-    trend="add",
-    seasonal=None).fit()
-
-# --- 4. GENERATE FORECAST ---
-forecast_values = model.forecast(h)
-last_year = ts_ratio.index.max()
-future_years = range(last_year + 1, last_year + h + 1)
-
-forecast = pd.Series(
-    [ts_ratio.iloc[-1]] + list(forecast_values.values),
-    index=[last_year] + list(future_years))
-
-# --- 5. PLOT THE RESULTS ---
-plt.figure(figsize=(10, 5))
-plt.plot(ts_ratio.index, ts_ratio, label="Observed (Avg NTB Ratio)", color='teal', linewidth=2)
-plt.plot(forecast.index, forecast, label="Forecasted Ratio", color='orange', linestyle="--", linewidth=2)
-
-plt.axhline(0, color='black', linewidth=1, alpha=0.5) # The "Balance" line
+plt.figure(figsize=(9,5))
+plt.plot(ts_ntb.index, ts_ntb, label="Observed NTB ratio")
+plt.plot([ts_ntb.index[-1]] + list(fc_ntb.index),[ts_ntb.iloc[-1]] + list(fc_ntb.values),"--", label="Forecast NTB ratio")
+plt.axhline(0, color="black", linewidth=1)
 plt.title("Iron & Steel – Cluster 0 – Structural Trade Balance Forecast")
 plt.xlabel("Year")
-plt.ylabel("NTB Ratio (Exports-Imports / Total Trade)")
-plt.grid(True, alpha=0.3)
+plt.ylabel("NTB ratio")
 plt.legend()
+plt.grid(alpha=0.3)
 plt.show()
 
-
-# 1. Filter data for Cluster 0 and set Year as index
-c0_data = cluster_ts_ironsteel[
-    cluster_ts_ironsteel["cluster_agglomerative_ironsteel"] == 0
-    ].sort_values("year").set_index("year")
-
-# Define our two groups based on your methodology
-level_features = ["Export", "Import", "net_usd"]
-ratio_features = ["reexport_ratio", "reimport_ratio"]
-h = 12  # Forecast horizon (up to 2028ish)
-
-# --- A. FORECASTING LEVELS (Holt's Linear Trend) ---
-plt.figure(figsize=(12, 6))
+# 2. Level features
+plt.figure(figsize=(12,6))
 for feature in level_features:
-    ts = c0_data[feature]
+    ts = c0_ironsteel_data[feature].sort_index()
+    model = ExponentialSmoothing(ts, trend="add", damped_trend=True, seasonal=None).fit()
+    fc = model.forecast(h)
+    last_year = ts.index.max()
+    fc.index = range(last_year + 1, last_year + h + 1)
+    line, = plt.plot(ts.index, ts, label=f"{feature} observed")
+    plt.plot(
+        [last_year] + list(fc.index),
+        [ts.iloc[-1]] + list(fc.values),
+        "--",
+        color=line.get_color(),
+        label=f"{feature} forecast")
 
-    # Levels represent scale/volume; we use an additive trend
-    model = ExponentialSmoothing(ts, trend="add", seasonal=None).fit()
-    forecast_values = model.forecast(h)
-
-    # Plotting
-    line, = plt.plot(ts.index, ts, label=f"Observed {feature}")
-    plt.plot(range(ts.index.max(), ts.index.max() + h + 1),
-             [ts.iloc[-1]] + list(forecast_values),
-             linestyle="--", color=line.get_color(), label=f"Forecast {feature}")
-
-plt.title("Iron & Steel – Cluster 0 – Level Features Forecast (USD)")
-plt.ylabel("Value (USD)")
-plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left')
-plt.grid(True, alpha=0.3)
+plt.title("Iron & Steel – Cluster 0 – Level indicators forecast")
+plt.ylabel("USD")
+plt.legend(bbox_to_anchor=(1.05, 1), loc="upper left")
+plt.grid(alpha=0.3)
 plt.tight_layout()
 plt.show()
 
-# --- B. FORECASTING RATIOS (Simple Exponential Smoothing) ---
-plt.figure(figsize=(12, 6))
+# 3.Ratios SES
+ratio_features = ["reexport_ratio", "reimport_ratio"]
+plt.figure(figsize=(10,6))
 for feature in ratio_features:
-    ts = c0_data[feature]
-
-# Ratios represent structure/identity; SES is better for mean-reversion
+    ts = c0_ironsteel_data[feature].sort_index()
     model = SimpleExpSmoothing(ts).fit()
-    forecast_values = model.forecast(h)
+    fc = model.forecast(h)
+    last_year = ts.index.max()
+    fc.index = range(last_year + 1, last_year + h + 1)
+    line, = plt.plot(ts.index, ts, label=f"{feature} observed")
+    plt.plot(
+        [last_year] + list(fc.index),
+        [ts.iloc[-1]] + list(fc.values),
+        "--",
+        color=line.get_color(),
+        label=f"{feature} forecast")
 
-# Plotting
-    line, = plt.plot(ts.index, ts, label=f"Observed {feature}")
-    plt.plot(range(ts.index.max(), ts.index.max() + h + 1),
-             [ts.iloc[-1]] + list(forecast_values),
-             linestyle="--", color=line.get_color(), label=f"Forecast {feature}")
-
-plt.title("Iron & Steel – Cluster 0 – Structural Ratio Forecast")
-plt.ylabel("Ratio (0 to 1)")
-plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left')
-plt.grid(True, alpha=0.3)
+plt.title("Iron & Steel – Cluster 0 – Structural ratio forecast")
+plt.ylabel("Ratio")
+plt.legend(bbox_to_anchor=(1.05, 1), loc="upper left")
+plt.grid(alpha=0.3)
 plt.tight_layout()
 plt.show()
 
-#Forecast for cluster 1 for iron and steel
-
-# 1. Filter specifically for Cluster 1
-c1_data = cluster_ts_ironsteel[
+#Forecast for Cluster 1 - Iron & Steel
+c1_ironsteel_data = cluster_ts_ironsteel[
     cluster_ts_ironsteel["cluster_agglomerative_ironsteel"] == 1
     ].sort_values("year").set_index("year")
+h=5
 
-# Re-using your defined groups
-level_features = ["Export", "Import", "net_usd"]
-ratio_features = ["reexport_ratio", "reimport_ratio"]
-h = 12
-
-# --- A. FORECASTING LEVELS (Holt's Linear Trend) ---
-# For producers, we use damped_trend=True to keep growth projections realistic
 plt.figure(figsize=(12, 6))
 for feature in level_features:
-    ts = c1_data[feature]
-
-    # Use additive trend with damping for these high-volume exporters
-    model = ExponentialSmoothing(ts, trend="add", damped_trend=True, seasonal=None).fit()
-    forecast_values = model.forecast(h)
-
+    ts = c1_ironsteel_data[feature].sort_index()
+    model = ExponentialSmoothing(
+        ts, trend="add", damped_trend=True, seasonal=None).fit()
+    fc = model.forecast(h)
+    last_year = ts.index.max()
+    fc.index = range(last_year + 1, last_year + h + 1)
     line, = plt.plot(ts.index, ts, label=f"Observed {feature}", linewidth=2)
-    plt.plot(range(ts.index.max(), ts.index.max() + h + 1),
-             [ts.iloc[-1]] + list(forecast_values),
-             linestyle="--", color=line.get_color(), label=f"Forecast {feature}")
+    plt.plot(
+        [last_year] + list(fc.index),
+        [ts.iloc[-1]] + list(fc.values),
+        "--",
+        color=line.get_color(),
+        label=f"Forecast {feature}")
 
 plt.title("Iron & Steel – Cluster 1 – Producer Level Forecast (Scale: 1e9 USD)")
 plt.ylabel("Value (USD)")
@@ -799,12 +767,10 @@ plt.grid(True, alpha=0.3)
 plt.tight_layout()
 plt.show()
 
-# --- B. FORECASTING RATIOS (Simple Exponential Smoothing) ---
+# Ratios SES
 plt.figure(figsize=(12, 6))
 for feature in ratio_features:
-    ts = c1_data[feature]
-
-    # SES is best here because Cluster 1 ratios are near-zero and noisy
+    ts = c1_ironsteel_data[feature]
     model = SimpleExpSmoothing(ts).fit()
     forecast_values = model.forecast(h)
 
@@ -820,24 +786,14 @@ plt.grid(True, alpha=0.3)
 plt.tight_layout()
 plt.show()
 
-#Forecast for Cluster 2
-# 1. Filter specifically for Cluster 2
-c2_data = cluster_ts_ironsteel[
+#Forecast for Cluster 2 - Iron & Steel
+c2_ironsteel_data = cluster_ts_ironsteel[
     cluster_ts_ironsteel["cluster_agglomerative_ironsteel"] == 2
     ].sort_values("year").set_index("year")
 
-# Re-using your defined groups to maintain consistency
-level_features = ["Export", "Import", "net_usd"]
-ratio_features = ["reexport_ratio", "reimport_ratio"]
-h = 12
-
-# --- A. FORECASTING LEVELS (Damped Holt's) ---
-# Damping is essential here to handle the extreme 2011-2013 volatility
 plt.figure(figsize=(12, 6))
 for feature in level_features:
-    ts = c2_data[feature]
-
-    # We use damped_trend=True because the spikes in Cluster 2 are likely outliers
+    ts = c2_ironsteel_data[feature]
     model = ExponentialSmoothing(ts, trend="add", damped_trend=True, seasonal=None).fit()
     forecast_values = model.forecast(h)
 
@@ -854,40 +810,23 @@ plt.tight_layout()
 plt.show()
 
 # Forecast for Cluster 0 – Cereals
+c0_cereals_data = (
+    cluster_ts_cereals[
+        cluster_ts_cereals["cluster_agglomerative_cereals"] == 0]
+    .sort_values("year")
+    .set_index("year")
+)
+h = 5
+plt.figure(figsize=(12, 6))
+for feature in level_features:
+    ts = c0_cereals_data[feature].sort_index()
+    model = ExponentialSmoothing(ts, trend="add", damped_trend=True, seasonal=None).fit()
+    forecast_values = model.forecast(h)
 
-ts = (cluster_ts_cereals[cluster_ts_cereals["cluster_agglomerative_cereals"] == 0]
-      .sort_values("year")
-      .set_index("year")["net_usd"])   # <-- keep it 1D
-
-ts.index = ts.index.astype(int)
-
-h = 15
-
-model = ExponentialSmoothing(
-    ts,
-    trend="add",
-    damped_trend=True,
-    seasonal=None,
-    use_boxcox=True          # <-- put it here (version-safe)
-).fit()
-
-forecast_values = model.forecast(h)
-
-last_year = int(ts.index.max())
-future_years = range(last_year + 1, last_year + h + 1)
-
-forecast = pd.Series(forecast_values.values, index=future_years)
-
-# connector point (scalar!)
-last_value = float(ts.loc[last_year])
-forecast_plot = pd.concat([pd.Series({last_year: last_value}), forecast])
-
-plt.figure(figsize=(9,5))
-plt.plot(ts.index, ts.values, label="Observed", linewidth=2)
-plt.plot(forecast_plot.index, forecast_plot.values, linestyle="--", label="Forecast", linewidth=2)
-
-plt.axvline(x=last_year, color="gray", linestyle=":", alpha=0.6)
-
+    line, = plt.plot(ts.index, ts, label=f"Observed {feature}", linewidth=2)
+    plt.plot(range(ts.index.max(), ts.index.max() + h + 1),
+             [ts.iloc[-1]] + list(forecast_values),
+             linestyle="--", color=line.get_color(), label=f"Forecast {feature}")
 plt.title("Cereals – Cluster 0 – net_usd Forecast")
 plt.xlabel("Year")
 plt.ylabel("USD")
@@ -896,39 +835,44 @@ plt.grid(True)
 plt.tight_layout()
 plt.show()
 
-#Cluster 1 cereals forecasting
-ts = (cluster_ts_cereals[cluster_ts_cereals["cluster_agglomerative_cereals"] == 1]
-      .sort_values("year")
-      .set_index("year")["net_usd"])
+#Ratio SES
+plt.figure(figsize=(12, 6))
+for feature in ratio_features:
+    ts = c0_cereals_data[feature]
+    model = SimpleExpSmoothing(ts).fit()
+    forecast_values = model.forecast(h)
 
-ts.index = ts.index.astype(int)
+    line, = plt.plot(ts.index, ts, label=f"Observed {feature}", linewidth=2)
+    plt.plot(range(ts.index.max(), ts.index.max() + h + 1),
+             [ts.iloc[-1]] + list(forecast_values),
+             linestyle="--", color=line.get_color(), label=f"Forecast {feature}")
 
-h = 15
+plt.title("Cereals – Cluster 0 – Ratio Forecast")
+plt.ylabel("Ratio Value")
+plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left')
+plt.grid(True, alpha=0.3)
+plt.tight_layout()
+plt.show()
 
-# neg values dont work with box-cox
-model = ExponentialSmoothing(
-    ts,
-    trend="add",
-    damped_trend=True,
-    seasonal=None,
-).fit()
 
-forecast_values = model.forecast(h)
+#Forecast for Cluster 1 - Cereals
+c1_cereals_data = (
+    cluster_ts_cereals[
+        cluster_ts_cereals["cluster_agglomerative_cereals"] == 1]
+    .sort_values("year")
+    .set_index("year")
+)
+h = 5
+plt.figure(figsize=(12, 6))
+for feature in level_features:
+    ts = c1_cereals_data[feature].sort_index()
+    model = ExponentialSmoothing(ts, trend="add", damped_trend=True, seasonal=None).fit()
+    forecast_values = model.forecast(h)
 
-last_year = int(ts.index.max())
-future_years = range(last_year + 1, last_year + h + 1)
-
-forecast = pd.Series(forecast_values.values, index=future_years)
-
-# connector point (scalar!)
-last_value = float(ts.loc[last_year])
-forecast_plot = pd.concat([pd.Series({last_year: last_value}), forecast])
-
-plt.figure(figsize=(9,5))
-plt.plot(ts.index, ts.values, label="Observed", linewidth=2)
-plt.plot(forecast_plot.index, forecast_plot.values, linestyle="--", label="Forecast", linewidth=2)
-
-plt.axvline(x=last_year, color="gray", linestyle=":", alpha=0.6)
+    line, = plt.plot(ts.index, ts, label=f"Observed {feature}", linewidth=2)
+    plt.plot(range(ts.index.max(), ts.index.max() + h + 1),
+             [ts.iloc[-1]] + list(forecast_values),
+             linestyle="--", color=line.get_color(), label=f"Forecast {feature}")
 
 plt.title("Cereals – Cluster 1 – net_usd Forecast")
 plt.xlabel("Year")
