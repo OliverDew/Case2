@@ -7,14 +7,11 @@ from scipy.cluster.hierarchy import dendrogram, linkage
 from sklearn.cluster import AgglomerativeClustering
 from sklearn.preprocessing import StandardScaler
 from statsmodels.tsa.holtwinters import ExponentialSmoothing
-from statsmodels.tsa.holtwinters import SimpleExpSmoothing
 from pathlib import Path
-
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import adjusted_rand_score
 from scipy.optimize import linear_sum_assignment
 from sklearn.metrics import confusion_matrix
-
 import warnings
 from statsmodels.tools.sm_exceptions import ConvergenceWarning
 warnings.filterwarnings("ignore", category=ConvergenceWarning)
@@ -259,7 +256,7 @@ print(df_net_cereals.head())
 df_net_ironsteel = df_net.loc[df_net['category'] == '72_iron_and_steel', :]
 print(df_net_ironsteel.head())
 
-# preparation for Clustering of Cereals:
+# Thao - preparation for Clustering of Cereals:
 # Aggregate per country
 df_cluster_cereals = (
     df_net_cereals
@@ -352,7 +349,7 @@ plt.ylabel("Count")
 plt.tight_layout()
 plt.show()
 
-##### Thao & Vera
+##### Thao & Vera:
 
 agglomerative_summary = (
     df_cluster_ironsteel
@@ -381,7 +378,7 @@ for cluster, countries in clusters_ironsteel.items():
     print()
 
 
-# Time Series for Iron&Steel
+# Vera - Time Series for Iron&Steel
 
 # sort Data by year:
 df_net_ironsteel = df_net_ironsteel.sort_values("year")
@@ -447,7 +444,7 @@ for c1 in clusters:
     plt.show()
 
 
-# Agglomerative Clustering for Cereals:
+# Thao: Agglomerative Clustering for Cereals:
 
 # Linkage matrix
 X = linkage(cereals_scaled, method='ward')
@@ -481,8 +478,7 @@ plot_heatmap(
     scaled=cereals_scaled,
     cluster_col="cluster_agglomerative_cereals",
     feature_cols=cereals_features,
-    title="Cereals – Cluster Profiles (Scaled Feature Means)"
-)
+    title="Cereals – Cluster Profiles (Scaled Feature Means)")
 
 stability_cereals = cluster_stability_repeated(
     X_scaled=cereals_scaled,
@@ -490,8 +486,7 @@ stability_cereals = cluster_stability_repeated(
     linkage="ward",
     test_size=0.5,
     n_repeats=50,
-    seed=123
-)
+    seed=123)
 
 plt.figure(figsize=(8,4))
 plt.hist(stability_cereals["ARI_B"], bins=12)
@@ -533,7 +528,7 @@ df_net_cereals = df_net_cereals.merge(
 save_csv(df_net_cereals, "df_net_cereals.csv")
 
 
-# Time Series for Cereals
+# Vera: Time Series for Cereals
 
 # sort Data by year:
 df_net_cereals = df_net_cereals.sort_values("year")
@@ -593,7 +588,7 @@ for c1 in clusters:
     plt.tight_layout()
     plt.show()
 
-# FORECASTING:
+# Thao - FORECASTING:
 
 #Forecast for Cluster 0 - Iron & Steel
 c0_ironsteel_data = (
